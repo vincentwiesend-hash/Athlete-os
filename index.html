@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -10,94 +11,87 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0a0a0f;
-  --surface: #12121a;
-  --surface2: #1a1a26;
-  --border: rgba(255,255,255,0.07);
-  --text: #f0f0f8;
-  --muted: rgba(240,240,248,0.45);
-  --accent: #c8f135;
-  --accent2: #6c63ff;
-  --red: #ff4d6d;
-  --orange: #ff8c42;
-  --teal: #3dffc0;
-  --font-display: 'Syne', sans-serif;
-  --font-mono: 'DM Mono', monospace;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a26;
+  --border: rgba(255,255,255,0.07); --text: #f0f0f8;
+  --muted: rgba(240,240,248,0.45); --accent: #c8f135;
+  --accent2: #6c63ff; --red: #ff4d6d; --orange: #ff8c42; --teal: #3dffc0;
+  --font-display: 'Syne', sans-serif; --font-mono: 'DM Mono', monospace;
+  --safe-top: env(safe-area-inset-top,0px); --safe-bottom: env(safe-area-inset-bottom,0px);
 }
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { background: var(--bg); color: var(--text); font-family: var(--font-display); min-height: 100vh; overflow-x: hidden; padding-top: var(--safe-top); padding-bottom: calc(80px + var(--safe-bottom)); }
-.nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,15,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; padding-bottom: var(--safe-bottom); z-index: 100; }
-.nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 0; gap: 4px; border: none; background: none; cursor: pointer; color: var(--muted); font-family: var(--font-display); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; transition: color 0.2s; }
-.nav-btn.active { color: var(--accent); }
-.nav-icon { font-size: 20px; line-height: 1; }
-.header { padding: 20px 20px 0; display: flex; align-items: center; justify-content: space-between; }
-.header-greeting { font-size: 13px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-mono); }
-.header-date { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
-.screen { display: none; padding: 0 16px; }
-.screen.active { display: block; }
-.section-title { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); font-family: var(--font-mono); margin: 24px 0 12px; }
-.recovery-hero { margin: 20px 0; display: flex; flex-direction: column; align-items: center; }
-.ring-wrap { position: relative; width: 200px; height: 200px; }
-.ring-wrap svg { transform: rotate(-90deg); }
-.ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.ring-score { font-size: 56px; font-weight: 800; line-height: 1; background: linear-gradient(135deg, var(--accent), var(--teal)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.ring-label { font-size: 11px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; font-family: var(--font-mono); margin-top: 4px; }
-.ring-status { font-size: 14px; font-weight: 600; color: var(--accent); margin-top: 16px; letter-spacing: 0.05em; }
-.metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; position: relative; overflow: hidden; }
-.metric-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent-color, var(--accent)); }
-.metric-label { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-mono); }
-.metric-value { font-size: 28px; font-weight: 700; margin: 6px 0 2px; line-height: 1; }
-.metric-unit { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
-.metric-trend { font-size: 11px; margin-top: 8px; font-family: var(--font-mono); }
-.activity-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 14px; }
-.activity-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-.activity-icon.run { background: rgba(200,241,53,0.12); }
-.activity-icon.ride { background: rgba(109,99,255,0.15); }
-.activity-icon.swim { background: rgba(61,255,192,0.1); }
-.activity-name { font-size: 15px; font-weight: 600; }
-.activity-date { font-size: 11px; color: var(--muted); font-family: var(--font-mono); margin-top: 2px; }
-.activity-stats { display: flex; gap: 12px; margin-top: 8px; }
-.activity-stat { font-size: 12px; font-family: var(--font-mono); color: var(--muted); }
-.activity-stat span { color: var(--text); font-weight: 500; }
-.activity-right { margin-left: auto; text-align: right; flex-shrink: 0; }
-.activity-dist { font-size: 18px; font-weight: 700; }
-.activity-dist-unit { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
-.token-section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin: 12px 0; }
-.token-section h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-.token-section p { font-size: 12px; color: var(--muted); font-family: var(--font-mono); margin-bottom: 12px; }
-.token-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-family: var(--font-mono); font-size: 12px; margin-bottom: 10px; }
-.token-input:focus { outline: none; border-color: var(--accent); }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; border-radius: 10px; font-family: var(--font-display); font-size: 13px; font-weight: 600; letter-spacing: 0.05em; cursor: pointer; border: none; transition: all 0.2s; }
-.btn-accent { background: var(--accent); color: #0a0a0f; width: 100%; }
-.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-.status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px; font-size: 11px; font-family: var(--font-mono); }
-.status-ok { background: rgba(200,241,53,0.1); color: var(--accent); }
-.status-wait { background: rgba(255,255,255,0.05); color: var(--muted); }
-.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-.ai-card { background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(61,255,192,0.08)); border: 1px solid rgba(108,99,255,0.3); border-radius: 20px; padding: 20px; margin-bottom: 10px; }
-.ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.ai-avatar { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--accent2), var(--teal)); display: flex; align-items: center; justify-content: center; font-size: 16px; }
-.ai-name { font-size: 12px; font-weight: 600; letter-spacing: 0.05em; }
-.ai-role { font-size: 10px; color: var(--muted); font-family: var(--font-mono); }
-.ai-message { font-size: 14px; line-height: 1.7; color: rgba(240,240,248,0.9); }
-.ai-message strong { color: var(--accent); font-weight: 600; }
-.ask-input-wrap { display: flex; gap: 8px; margin-top: 12px; }
-.ask-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; color: var(--text); font-family: var(--font-display); font-size: 13px; }
-.ask-input:focus { outline: none; border-color: var(--accent2); }
-.btn-send { width: 42px; height: 42px; border-radius: 10px; background: var(--accent2); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; color: white; }
-.chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
-.bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.bar { width: 100%; border-radius: 4px 4px 0 0; }
-.bar-day { font-size: 9px; color: var(--muted); font-family: var(--font-mono); }
-.upload-zone { border: 2px dashed var(--border); border-radius: 16px; padding: 32px 20px; text-align: center; cursor: pointer; }
-.upload-zone input { display: none; }
-.upload-icon { font-size: 32px; margin-bottom: 8px; }
-.upload-text { font-size: 14px; font-weight: 600; }
-.upload-sub { font-size: 12px; color: var(--muted); font-family: var(--font-mono); margin-top: 4px; }
-::-webkit-scrollbar { display: none; }
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { background:var(--bg); color:var(--text); font-family:var(--font-display); min-height:100vh; overflow-x:hidden; padding-top:var(--safe-top); padding-bottom:calc(80px + var(--safe-bottom)); }
+.nav { position:fixed; bottom:0; left:0; right:0; background:rgba(10,10,15,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-top:1px solid var(--border); display:flex; padding-bottom:var(--safe-bottom); z-index:100; }
+.nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px 0; gap:4px; border:none; background:none; cursor:pointer; color:var(--muted); font-family:var(--font-display); font-size:10px; letter-spacing:0.05em; text-transform:uppercase; transition:color 0.2s; }
+.nav-btn.active { color:var(--accent); }
+.nav-icon { font-size:20px; line-height:1; }
+.header { padding:20px 20px 0; display:flex; align-items:center; justify-content:space-between; }
+.header-greeting { font-size:13px; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; font-family:var(--font-mono); }
+.header-date { font-size:11px; color:var(--muted); font-family:var(--font-mono); }
+.screen { display:none; padding:0 16px; }
+.screen.active { display:block; }
+.section-title { font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); font-family:var(--font-mono); margin:24px 0 12px; }
+.recovery-hero { margin:20px 0; display:flex; flex-direction:column; align-items:center; }
+.ring-wrap { position:relative; width:200px; height:200px; }
+.ring-wrap svg { transform:rotate(-90deg); }
+.ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.ring-score { font-size:56px; font-weight:800; line-height:1; background:linear-gradient(135deg,var(--accent),var(--teal)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.ring-label { font-size:11px; color:var(--muted); letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-mono); margin-top:4px; }
+.ring-status { font-size:14px; font-weight:600; color:var(--accent); margin-top:16px; letter-spacing:0.05em; text-align:center; padding:0 20px; }
+.metric-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.metric-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:16px; position:relative; overflow:hidden; }
+.metric-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--accent-color, var(--accent)); }
+.metric-label { font-size:10px; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; font-family:var(--font-mono); }
+.metric-value { font-size:28px; font-weight:700; margin:6px 0 2px; line-height:1; }
+.metric-unit { font-size:11px; color:var(--muted); font-family:var(--font-mono); }
+.activity-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:10px; display:flex; align-items:center; gap:14px; }
+.activity-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.activity-icon.run { background:rgba(200,241,53,0.12); }
+.activity-icon.ride { background:rgba(109,99,255,0.15); }
+.activity-icon.swim { background:rgba(61,255,192,0.1); }
+.activity-name { font-size:15px; font-weight:600; }
+.activity-date { font-size:11px; color:var(--muted); font-family:var(--font-mono); margin-top:2px; }
+.activity-stats { display:flex; gap:12px; margin-top:8px; }
+.activity-stat { font-size:12px; font-family:var(--font-mono); color:var(--muted); }
+.activity-stat span { color:var(--text); font-weight:500; }
+.activity-right { margin-left:auto; text-align:right; flex-shrink:0; }
+.activity-dist { font-size:18px; font-weight:700; }
+.activity-dist-unit { font-size:11px; color:var(--muted); font-family:var(--font-mono); }
+.token-section { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; margin:12px 0; }
+.token-section h3 { font-size:14px; font-weight:600; margin-bottom:4px; }
+.token-section p { font-size:12px; color:var(--muted); font-family:var(--font-mono); margin-bottom:12px; }
+.token-input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:12px 14px; color:var(--text); font-family:var(--font-mono); font-size:12px; margin-bottom:10px; }
+.token-input:focus { outline:none; border-color:var(--accent); }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 20px; border-radius:10px; font-family:var(--font-display); font-size:13px; font-weight:600; letter-spacing:0.05em; cursor:pointer; border:none; transition:all 0.2s; }
+.btn-accent { background:var(--accent); color:#0a0a0f; width:100%; }
+.btn-accent:active { transform:scale(0.97); }
+.btn-outline { background:transparent; border:1px solid var(--border); color:var(--text); }
+.status-pill { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:99px; font-size:11px; font-family:var(--font-mono); }
+.status-ok { background:rgba(200,241,53,0.1); color:var(--accent); }
+.status-wait { background:rgba(255,255,255,0.05); color:var(--muted); }
+.dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
+.ai-card { background:linear-gradient(135deg,rgba(108,99,255,0.15),rgba(61,255,192,0.08)); border:1px solid rgba(108,99,255,0.3); border-radius:20px; padding:20px; margin-bottom:10px; }
+.ai-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.ai-avatar { width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,var(--accent2),var(--teal)); display:flex; align-items:center; justify-content:center; font-size:16px; }
+.ai-name { font-size:12px; font-weight:600; }
+.ai-role { font-size:10px; color:var(--muted); font-family:var(--font-mono); }
+.ai-message { font-size:14px; line-height:1.7; color:rgba(240,240,248,0.9); }
+.ai-message strong { color:var(--accent); font-weight:600; }
+.ask-input-wrap { display:flex; gap:8px; margin-top:12px; }
+.ask-input { flex:1; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:var(--text); font-family:var(--font-display); font-size:13px; }
+.ask-input:focus { outline:none; border-color:var(--accent2); }
+.btn-send { width:42px; height:42px; border-radius:10px; background:var(--accent2); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; color:white; }
+.chart-bars { display:flex; align-items:flex-end; gap:4px; height:60px; margin:12px 0; }
+.bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.bar { width:100%; border-radius:4px 4px 0 0; min-height:4px; }
+.bar-day { font-size:9px; color:var(--muted); font-family:var(--font-mono); }
+.upload-zone { border:2px dashed var(--border); border-radius:16px; padding:28px 20px; text-align:center; cursor:pointer; margin-bottom:10px; transition:border-color 0.2s; }
+.upload-zone:active { border-color:var(--accent); }
+.upload-zone input { display:none; }
+.upload-icon { font-size:28px; margin-bottom:8px; }
+.upload-text { font-size:14px; font-weight:600; }
+.upload-sub { font-size:12px; color:var(--muted); font-family:var(--font-mono); margin-top:4px; }
+.history-row { background:rgba(255,255,255,0.04); border-radius:12px; padding:12px 14px; margin:8px 0; font-size:14px; }
+::-webkit-scrollbar { display:none; }
 </style>
 </head>
 <body>
@@ -109,6 +103,8 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-displa
   </div>
   <div id="connection-status" class="status-pill status-wait"><div class="dot"></div> Nicht verbunden</div>
 </div>
+
+<!-- TODAY -->
 
 <div class="screen active" id="screen-today">
   <div class="section-title">Recovery Score</div>
@@ -129,46 +125,57 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-displa
         <div class="ring-label">Recovery</div>
       </div>
     </div>
-    <div class="ring-status" id="recovery-status">Whoop CSV importieren</div>
+    <div class="ring-status" id="recovery-status">Whoop CSV unter „Daten" importieren</div>
   </div>
+
   <div class="metric-grid">
-    <div class="metric-card" style="--accent-color: var(--red)">
+    <div class="metric-card" style="--accent-color:var(--red)">
       <div class="metric-label">Ruhepuls</div>
       <div class="metric-value" id="rhr">--</div>
       <div class="metric-unit">bpm</div>
     </div>
-    <div class="metric-card" style="--accent-color: var(--accent2)">
+    <div class="metric-card" style="--accent-color:var(--accent2)">
       <div class="metric-label">HRV</div>
       <div class="metric-value" id="hrv">--</div>
       <div class="metric-unit">ms</div>
     </div>
-    <div class="metric-card" style="--accent-color: var(--teal)">
+    <div class="metric-card" style="--accent-color:var(--teal)">
       <div class="metric-label">Schlaf</div>
       <div class="metric-value" id="sleep">--</div>
       <div class="metric-unit">Stunden</div>
     </div>
-    <div class="metric-card" style="--accent-color: var(--orange)">
-      <div class="metric-label">Strain</div>
+    <div class="metric-card" style="--accent-color:var(--orange)">
+      <div class="metric-label">Tagesbelastung</div>
       <div class="metric-value" id="strain">--</div>
       <div class="metric-unit">/ 21</div>
     </div>
   </div>
-  <div class="section-title">Diese Woche</div>
+
+  <div class="section-title">Recovery – letzte 7 Tage</div>
   <div class="chart-bars" id="week-chart"></div>
+
+  <div class="section-title">Heutiger Tag</div>
+  <div id="today-details" style="color:var(--muted);font-size:13px;font-family:var(--font-mono);">Lade Whoop Daten für Details.</div>
 </div>
+
+<!-- TRAINING -->
 
 <div class="screen" id="screen-activities">
   <div class="section-title">Strava verbinden</div>
   <div class="token-section">
     <h3>🏃 Strava Access Token</h3>
-    <p>Füge deinen Token ein um Aktivitäten zu laden</p>
+    <p>Token aus reqbin.com einfügen</p>
     <input class="token-input" id="strava-token" type="password" placeholder="Access Token..."/>
     <button class="btn btn-accent" onclick="connectStrava()">Verbinden & laden</button>
     <div id="strava-status" style="margin-top:10px;font-size:12px;color:var(--muted);font-family:var(--font-mono);"></div>
   </div>
   <div class="section-title">Aktivitäten</div>
-  <div id="activities-list"><div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;font-family:var(--font-mono);">Verbinde Strava um Aktivitäten zu sehen</div></div>
+  <div id="activities-list">
+    <div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;font-family:var(--font-mono);">Verbinde Strava um Aktivitäten zu sehen</div>
+  </div>
 </div>
+
+<!-- COACH -->
 
 <div class="screen" id="screen-coach">
   <div class="section-title">KI Coach</div>
@@ -177,40 +184,45 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-displa
       <div class="ai-avatar">🤖</div>
       <div><div class="ai-name">Athlete OS Coach</div><div class="ai-role">Powered by Claude AI</div></div>
     </div>
-    <div class="ai-message" id="coach-message">Verbinde deine Daten und ich analysiere dein Training, deine Recovery und gebe dir personalisierte Empfehlungen. 💪</div>
+    <div class="ai-message" id="coach-message">Lade deine Daten und ich analysiere dein Training und deine Recovery. 💪</div>
   </div>
   <div class="ask-input-wrap">
-    <input class="ask-input" id="coach-input" placeholder="Frag deinen Coach..."/>
+    <input class="ask-input" id="coach-input" placeholder="Frag deinen Coach..." onkeydown="if(event.key==='Enter')askCoach()"/>
     <button class="btn-send" onclick="askCoach()">↑</button>
   </div>
   <div id="coach-history"></div>
   <div class="section-title">Schnell-Fragen</div>
-  <div style="display:flex;flex-wrap:wrap;gap:8px;">
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
     <button class="btn btn-outline" onclick="quickAsk('Soll ich heute hart trainieren?')" style="font-size:12px;padding:8px 14px;">Heute trainieren? 💪</button>
     <button class="btn btn-outline" onclick="quickAsk('Analysiere meine letzte Woche')" style="font-size:12px;padding:8px 14px;">Woche analysieren 📊</button>
     <button class="btn btn-outline" onclick="quickAsk('Wie kann ich meine Recovery verbessern?')" style="font-size:12px;padding:8px 14px;">Recovery Tipps 😴</button>
-    <button class="btn btn-outline" onclick="quickAsk('Erstelle mir einen Trainingsplan')" style="font-size:12px;padding:8px 14px;">Trainingsplan 📅</button>
+    <button class="btn btn-outline" onclick="quickAsk('Erstelle mir einen Trainingsplan für diese Woche')" style="font-size:12px;padding:8px 14px;">Trainingsplan 📅</button>
   </div>
 </div>
 
+<!-- DATEN -->
+
 <div class="screen" id="screen-data">
   <div class="section-title">Whoop Daten importieren</div>
-  <div class="upload-zone" onclick="document.getElementById('whoop-file').click()">
-    <input type="file" id="whoop-file" accept=".csv" onchange="importWhoop(this)">
-    <div class="upload-icon">📁</div>
-    <div class="upload-text">Whoop CSV hochladen</div>
-    <div class="upload-sub">recovery.csv / sleep.csv</div>
+
+  <div class="upload-zone" onclick="document.getElementById('whoop-zyklen').click()">
+    <input type="file" id="whoop-zyklen" accept=".csv" onchange="importCSV(this,'zyklen')">
+    <div class="upload-icon">📊</div>
+    <div class="upload-text">Physiologische Zyklen</div>
+    <div class="upload-sub">physiologische_zyklen.csv</div>
   </div>
-  <div class="section-title">Garmin</div>
-  <div class="token-section">
-    <h3>Garmin Login</h3>
-    <p>Garmin E-Mail & Passwort</p>
-    <input class="token-input" id="garmin-email" type="email" placeholder="E-Mail..." style="margin-bottom:8px;"/>
-    <input class="token-input" id="garmin-pass" type="password" placeholder="Passwort..."/>
-    <button class="btn btn-accent" onclick="alert('Garmin benötigt Backend-Server. Bitte CSV aus Garmin Connect exportieren.')" style="margin-top:8px;">Garmin verbinden</button>
+  <div id="zyklen-status" style="font-size:12px;font-family:var(--font-mono);color:var(--muted);margin-bottom:12px;"></div>
+
+  <div class="upload-zone" onclick="document.getElementById('whoop-schlaf').click()">
+    <input type="file" id="whoop-schlaf" accept=".csv" onchange="importCSV(this,'schlaf')">
+    <div class="upload-icon">😴</div>
+    <div class="upload-text">Schlafdaten</div>
+    <div class="upload-sub">Schlaf.csv</div>
   </div>
+  <div id="schlaf-status" style="font-size:12px;font-family:var(--font-mono);color:var(--muted);margin-bottom:12px;"></div>
+
   <div class="section-title">Status</div>
-  <div id="imported-data-summary" style="color:var(--muted);font-size:13px;font-family:var(--font-mono);padding:8px 0;">Noch keine Daten importiert.</div>
+  <div id="data-summary" style="color:var(--muted);font-size:13px;font-family:var(--font-mono);line-height:2;">Noch keine Daten importiert.</div>
 </div>
 
 <nav class="nav">
@@ -221,9 +233,10 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-displa
 </nav>
 
 <script>
-const state = { stravaToken:null, athlete:null, activities:[], whoopData:{recovery:[],sleep:[]}, coachHistory:[] };
+const state = { stravaToken:null, athlete:null, activities:[], zyklen:[], schlaf:[] };
 
-document.getElementById('current-date').textContent = new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
+document.getElementById('current-date').textContent =
+  new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
 
 function showScreen(name, btn) {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -233,24 +246,94 @@ function showScreen(name, btn) {
   if(name==='today') renderToday();
 }
 
+// CSV IMPORT – German Whoop columns
+function importCSV(input, type) {
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.trim().split('\n');
+    const rawHeaders = lines[0].split(',');
+    const rows = lines.slice(1).filter(l=>l.trim()).map(line => {
+      const vals = line.split(',');
+      const obj = {};
+      rawHeaders.forEach((h,i) => obj[h.trim()] = (vals[i]||'').trim());
+      return obj;
+    });
+    if(type==='zyklen') {
+      state.zyklen = rows;
+      document.getElementById('zyklen-status').textContent = `✅ ${rows.length} Zyklen geladen`;
+    } else {
+      state.schlaf = rows.filter(r=>r['Nickerchen']==='false');
+      document.getElementById('schlaf-status').textContent = `✅ ${state.schlaf.length} Schlafeinträge geladen`;
+    }
+    updateDataSummary();
+    renderToday();
+  };
+  reader.readAsText(file);
+}
+
+function updateDataSummary() {
+  const z = state.zyklen; const s = state.schlaf;
+  let html = '';
+  if(z.length>0) html += `📊 Zyklen: <strong style="color:var(--accent)">${z.length}</strong> Einträge<br>`;
+  if(s.length>0) html += `😴 Schlaf: <strong style="color:var(--accent)">${s.length}</strong> Nächte<br>`;
+  if(state.activities.length>0) html += `🏃 Strava: <strong style="color:var(--accent)">${state.activities.length}</strong> Aktivitäten<br>`;
+  document.getElementById('data-summary').innerHTML = html || 'Noch keine Daten importiert.';
+  document.getElementById('connection-status').className = 'status-pill status-ok';
+  document.getElementById('connection-status').innerHTML = '<div class="dot"></div> Verbunden';
+}
+
 function renderToday() {
-  const hasWhoop = state.whoopData.recovery.length > 0;
-  if(hasWhoop) {
-    const r = state.whoopData.recovery[0];
-    const score = Math.round((parseFloat(r.recovery_score)||0)*100);
-    document.getElementById('recovery-score').textContent = score;
-    animateRing(score);
-    document.getElementById('recovery-status').textContent = score>=67?'🟢 Bereit für hartes Training':score>=34?'🟡 Moderates Training':' 🔴 Regeneration';
-    document.getElementById('rhr').textContent = Math.round(parseFloat(r.resting_heart_rate)||0);
-    document.getElementById('hrv').textContent = Math.round(parseFloat(r.hrv_rmssd_on_waking)||0);
-    document.getElementById('sleep').textContent = ((parseFloat(r.sleep_performance_percentage)||0)*0.08).toFixed(1);
-  }
-  const acts = state.activities;
-  if(acts.length>0) {
-    const strain = Math.min(21, Math.round(acts.slice(0,7).reduce((s,a)=>s+(a.suffer_score||0),0)/10));
-    document.getElementById('strain').textContent = strain;
-  }
-  renderWeekChart();
+  const z = state.zyklen;
+  if(!z.length) return;
+
+  // Latest entry with recovery data
+  const latest = z.find(r => r['Erholungswert %'] && r['Erholungswert %'] !== '');
+  if(!latest) return;
+
+  const score = parseInt(latest['Erholungswert %']) || 0;
+  const rhr = parseInt(latest['Ruheherzfrequenz (Schläge pro Minute)']) || 0;
+  const hrv = parseInt(latest['Herzfrequenzvariabilität (ms)']) || 0;
+  const sleepMin = parseInt(latest['Schlafdauer (Min.)']) || 0;
+  const strain = parseFloat(latest['Tagesbelastung']) || 0;
+
+  document.getElementById('recovery-score').textContent = score;
+  document.getElementById('rhr').textContent = rhr;
+  document.getElementById('hrv').textContent = hrv;
+  document.getElementById('sleep').textContent = (sleepMin/60).toFixed(1);
+  document.getElementById('strain').textContent = strain.toFixed(1);
+
+  animateRing(score);
+
+  const status = score >= 67 ? '🟢 Bereit für hartes Training' :
+                 score >= 34 ? '🟡 Moderates Training empfohlen' :
+                               '🔴 Bitte heute regenerieren';
+  document.getElementById('recovery-status').textContent = status;
+
+  // Details
+  const spo2 = latest['Blutsauerstoff %'] || '--';
+  const temp = latest['Hauttemperatur (Celsius)'] || '--';
+  const kcal = latest['Verbrannte Energie (cal)'] || '--';
+  document.getElementById('today-details').innerHTML =
+    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">
+      <div>SpO2: <span style="color:var(--text)">${spo2}%</span></div>
+      <div>Hauttemp: <span style="color:var(--text)">${temp}°C</span></div>
+      <div>Kalorien: <span style="color:var(--text)">${kcal} kcal</span></div>
+      <div>Schlafeff.: <span style="color:var(--text)">${latest['Schlafeffizienz %'] || '--'}%</span></div>
+    </div>`;
+
+  // Week chart – last 7 entries with recovery
+  const withRecovery = z.filter(r=>r['Erholungswert %']&&r['Erholungswert %']!=='').slice(0,7).reverse();
+  const chart = document.getElementById('week-chart');
+  chart.innerHTML = withRecovery.map(r => {
+    const s = parseInt(r['Erholungswert %'])||0;
+    const date = (r['Startzeit des Zyklus']||'').slice(5,10);
+    const c = s>=67?'var(--accent)':s>=34?'var(--orange)':'var(--red)';
+    return `<div class="bar-wrap">
+      <div class="bar" style="height:${Math.max(s,4)}%;background:${c};"></div>
+      <div class="bar-day">${date}</div>
+    </div>`;
+  }).join('');
 }
 
 function animateRing(score) {
@@ -259,21 +342,10 @@ function animateRing(score) {
     const ring = document.getElementById('recovery-ring');
     ring.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(0.34,1.56,0.64,1)';
     ring.style.strokeDashoffset = offset;
-  },100);
+  }, 100);
 }
 
-function renderWeekChart() {
-  const days=['Mo','Di','Mi','Do','Fr','Sa','So'];
-  const vals = state.activities.length>0
-    ? days.map((_,i)=>{ const a=state.activities[i]; return a?Math.min(100,Math.round((a.distance||0)/150)):0; })
-    : [45,80,20,65,90,35,55];
-  document.getElementById('week-chart').innerHTML = days.map((d,i)=>{
-    const h=vals[i]||4;
-    const c=h>60?'var(--accent)':h>30?'var(--accent2)':'rgba(255,255,255,0.1)';
-    return `<div class="bar-wrap"><div class="bar" style="height:${h}%;background:${c};min-height:4px;"></div><div class="bar-day">${d}</div></div>`;
-  }).join('');
-}
-
+// STRAVA
 async function connectStrava() {
   const token = document.getElementById('strava-token').value.trim();
   if(!token) return;
@@ -281,21 +353,20 @@ async function connectStrava() {
   s.textContent = '⏳ Verbinde...';
   try {
     const r = await fetch('https://www.strava.com/api/v3/athlete',{headers:{'Authorization':'Bearer '+token}});
-    if(!r.ok) throw new Error('Token ungültig');
+    if(!r.ok) throw new Error('Token ungültig (Status '+r.status+')');
     state.stravaToken = token;
     state.athlete = await r.json();
     s.textContent = `✅ ${state.athlete.firstname} ${state.athlete.lastname}`;
-    document.getElementById('connection-status').className='status-pill status-ok';
-    document.getElementById('connection-status').innerHTML='<div class="dot"></div> Verbunden';
+    updateDataSummary();
     const a = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=30',{headers:{'Authorization':'Bearer '+token}});
     state.activities = await a.json();
     renderActivities();
-    s.textContent += ` · ${state.activities.length} Aktivitäten`;
-  } catch(e){ s.textContent='❌ '+e.message; }
+    s.textContent += ` · ${state.activities.length} Aktivitäten geladen`;
+  } catch(e) { s.textContent = '❌ '+e.message; }
 }
 
 function renderActivities() {
-  const icons={Run:'🏃',Ride:'🚴',Swim:'🏊',Walk:'🚶'};
+  const icons={Run:'🏃',Ride:'🚴',Swim:'🏊',Walk:'🚶',Hike:'🥾'};
   document.getElementById('activities-list').innerHTML = state.activities.slice(0,20).map(a=>{
     const ic=icons[a.type]||'⚡';
     const cls={Run:'run',Ride:'ride',Swim:'swim'}[a.type]||'run';
@@ -303,65 +374,89 @@ function renderActivities() {
     const date=new Date(a.start_date_local).toLocaleDateString('de-DE',{day:'2-digit',month:'short'});
     const time=a.moving_time?formatTime(a.moving_time):'';
     const pace=a.type==='Run'&&a.distance?formatPace(a.moving_time,a.distance):'';
-    return `<div class="activity-card"><div class="activity-icon ${cls}">${ic}</div><div style="flex:1;min-width:0;"><div class="activity-name">${a.name}</div><div class="activity-date">${date} · ${a.type}</div><div class="activity-stats">${time?`<div class="activity-stat"><span>${time}</span></div>`:''} ${pace?`<div class="activity-stat"><span>${pace}</span>/km</div>`:''}</div></div><div class="activity-right"><div class="activity-dist">${dist}</div><div class="activity-dist-unit">km</div></div></div>`;
+    return `<div class="activity-card">
+      <div class="activity-icon ${cls}">${ic}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="activity-name">${a.name}</div>
+        <div class="activity-date">${date} · ${a.type}</div>
+        <div class="activity-stats">
+          ${time?`<div class="activity-stat"><span>${time}</span></div>`:''}
+          ${pace?`<div class="activity-stat"><span>${pace}</span>/km</div>`:''}
+        </div>
+      </div>
+      <div class="activity-right"><div class="activity-dist">${dist}</div><div class="activity-dist-unit">km</div></div>
+    </div>`;
   }).join('');
 }
 
 function formatTime(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h>0?`${h}h ${m}min`:`${m}min`;}
 function formatPace(sec,dist){const p=sec/(dist/1000);return `${Math.floor(p/60)}:${String(Math.round(p%60)).padStart(2,'0')}`;}
 
-function importWhoop(input) {
-  const file=input.files[0]; if(!file) return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const lines=e.target.result.trim().split('\n');
-    const headers=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,''));
-    const rows=lines.slice(1).map(line=>{const v=line.split(',');const o={};headers.forEach((h,i)=>o[h]=v[i]?.trim());return o;});
-    if(file.name.toLowerCase().includes('recovery')) state.whoopData.recovery=rows;
-    else if(file.name.toLowerCase().includes('sleep')) state.whoopData.sleep=rows;
-    document.getElementById('imported-data-summary').innerHTML=`✅ ${file.name}: <strong>${rows.length}</strong> Einträge importiert`;
-    renderToday();
-    alert(`✅ ${rows.length} Einträge importiert!`);
-  };
-  reader.readAsText(file);
-}
-
+// COACH
 async function askCoach(){
   const input=document.getElementById('coach-input');
   const q=input.value.trim(); if(!q) return;
-  input.value='';
-  await sendToCoach(q);
+  input.value=''; await sendToCoach(q);
 }
-
-async function quickAsk(q){ await sendToCoach(q); }
+async function quickAsk(q){ await sendToCoach(q); showScreen('coach',document.querySelectorAll('.nav-btn')[2]); }
 
 async function sendToCoach(question) {
   const history=document.getElementById('coach-history');
   const userDiv=document.createElement('div');
-  userDiv.style.cssText='background:rgba(255,255,255,0.04);border-radius:12px;padding:12px 14px;margin:10px 0;font-size:14px;';
+  userDiv.className='history-row';
   userDiv.textContent='💬 '+question;
   history.prepend(userDiv);
   const aiDiv=document.createElement('div');
   aiDiv.className='ai-card';
-  aiDiv.innerHTML='<div class="ai-message">⏳ Coach denkt nach...</div>';
+  aiDiv.innerHTML='<div class="ai-message">⏳ Coach analysiert...</div>';
   history.prepend(aiDiv);
+
+  const ctx = buildContext();
+  const prompt = `Du bist ein professioneller Ausdauersportcoach. Antworte auf Deutsch, konkret, motivierend und kurz (max 5 Sätze).\n\nAthletendaten:\n${ctx}\n\nFrage: ${question}`;
+  const resp = await callClaude(prompt);
+  aiDiv.innerHTML=`<div class="ai-header"><div class="ai-avatar">🤖</div><div><div class="ai-name">Coach</div><div class="ai-role">Powered by Claude AI</div></div></div><div class="ai-message">${resp.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`;
+}
+
+function buildContext(){
   let ctx='';
   if(state.athlete) ctx+=`Athlet: ${state.athlete.firstname} ${state.athlete.lastname}\n`;
-  if(state.activities.length>0){const r=state.activities.slice(0,7);ctx+=`Letzte 7 Aktivitäten: ${r.length} Einheiten, ${r.reduce((s,a)=>s+a.distance/1000,0).toFixed(1)}km\n`;}
-  if(state.whoopData.recovery.length>0){const r=state.whoopData.recovery[0];ctx+=`Recovery: ${Math.round((parseFloat(r.recovery_score)||0)*100)}%, HRV: ${Math.round(parseFloat(r.hrv_rmssd_on_waking)||0)}ms\n`;}
-  const resp=await callClaude(`Du bist ein professioneller Sportcoach. Antworte auf Deutsch, konkret und motivierend.\n\nAthletendaten:\n${ctx||'Keine Daten.'}\n\nFrage: ${question}`);
-  aiDiv.innerHTML=`<div class="ai-header"><div class="ai-avatar">🤖</div><div><div class="ai-name">Coach</div><div class="ai-role">Powered by Claude AI</div></div></div><div class="ai-message">${resp.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>`;
+  const z=state.zyklen;
+  if(z.length>0){
+    const latest=z.find(r=>r['Erholungswert %']&&r['Erholungswert %']!=='');
+    if(latest){
+      ctx+=`Recovery heute: ${latest['Erholungswert %']}%\n`;
+      ctx+=`HRV: ${latest['Herzfrequenzvariabilität (ms)']}ms\n`;
+      ctx+=`Ruhepuls: ${latest['Ruheherzfrequenz (Schläge pro Minute)']}bpm\n`;
+      ctx+=`Schlaf: ${(parseInt(latest['Schlafdauer (Min.)'])/60).toFixed(1)}h\n`;
+      ctx+=`Tagesbelastung gestern: ${latest['Tagesbelastung']}\n`;
+    }
+    const last7=z.filter(r=>r['Erholungswert %']&&r['Erholungswert %']!=='').slice(0,7);
+    const avgRecovery=Math.round(last7.reduce((s,r)=>s+parseInt(r['Erholungswert %']),0)/last7.length);
+    const avgHRV=Math.round(last7.reduce((s,r)=>s+parseInt(r['Herzfrequenzvariabilität (ms)']),0)/last7.length);
+    ctx+=`Durchschnitt letzte 7 Tage – Recovery: ${avgRecovery}%, HRV: ${avgHRV}ms\n`;
+  }
+  if(state.activities.length>0){
+    const r=state.activities.slice(0,7);
+    ctx+=`Letzte Strava-Aktivitäten: ${r.length} Einheiten, ${r.reduce((s,a)=>s+a.distance/1000,0).toFixed(1)}km gesamt\n`;
+    ctx+=`Letzte Aktivität: ${r[0].name} (${(r[0].distance/1000).toFixed(1)}km)\n`;
+  }
+  return ctx||'Noch keine Daten geladen.';
 }
 
 async function callClaude(prompt){
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+    });
     const d=await r.json();
-    return d.content?.[0]?.text||'Keine Antwort.';
-  }catch(e){return '❌ Verbindungsfehler';}
+    return d.content?.[0]?.text||'Keine Antwort erhalten.';
+  }catch(e){return '❌ Verbindungsfehler. Bitte erneut versuchen.';}
 }
 
 renderToday();
 </script>
+
 </body>
 </html>

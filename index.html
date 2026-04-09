@@ -449,18 +449,23 @@ async function callClaude(prompt){
       method:'POST',
       headers:{
         'Content-Type':'application/json',
-        'Authorization':'Bearer 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'
+        'Authorization':'Bearer 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
       },
       body:JSON.stringify({
-        model:'llama3-8b-8192',
+        model:'mixtral-8x7b-32768',
         messages:[{role:'user',content:prompt}],
         max_tokens:1000
       })
     });
     const d=await r.json();
+    console.log('Groq response:', JSON.stringify(d));
+    if(d.error) return '❌ Fehler: '+d.error.message;
     return d.choices?.[0]?.message?.content||'Keine Antwort erhalten.';
-  }catch(e){return '❌ Verbindungsfehler. Bitte erneut versuchen.';}
+  }catch(e){
+    return '❌ Verbindungsfehler: '+e.message;
+  }
 }
+
 
 renderToday();
 </script>

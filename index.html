@@ -445,13 +445,20 @@ function buildContext(){
 
 async function callClaude(prompt){
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{
+    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer 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'
+      },
+      body:JSON.stringify({
+        model:'llama3-8b-8192',
+        messages:[{role:'user',content:prompt}],
+        max_tokens:1000
+      })
     });
     const d=await r.json();
-    return d.content?.[0]?.text||'Keine Antwort erhalten.';
+    return d.choices?.[0]?.message?.content||'Keine Antwort erhalten.';
   }catch(e){return '❌ Verbindungsfehler. Bitte erneut versuchen.';}
 }
 

@@ -460,7 +460,8 @@ async function callClaude(prompt){
     const d=await r.json();
     console.log('Groq response:', JSON.stringify(d));
     if(d.error) return '❌ Fehler: '+d.error.message;
-    return d.choices?.[0]?.message?.content||'Keine Antwort erhalten.';
+    return JSON.stringify(d);
+
   }catch(e){
     return '❌ Verbindungsfehler: '+e.message;
   }

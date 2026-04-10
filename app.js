@@ -5,7 +5,7 @@ const state = {
   profile: {
     primarySport: "Run",
     goal: "Halbmarathon",
-    goalDate: "2025-09-21",
+    goalDate: "2026-09-21",
     focus: "VO2max verbessern",
     experience: "Fortgeschritten",
     availableDays: 5,
@@ -70,6 +70,22 @@ function showScreen(name, btn) {
   btn.classList.add("active");
 }
 
+function updateProfile() {
+  const sport = document.getElementById("sport-select").value;
+  const goal = document.getElementById("goal-select").value;
+  const focus = document.getElementById("focus-select").value;
+  const goalDate = document.getElementById("goal-date-input").value;
+  const minutes = Number(document.getElementById("minutes-input").value || 60);
+
+  state.profile.primarySport = sport;
+  state.profile.goal = goal;
+  state.profile.focus = focus;
+  state.profile.goalDate = goalDate || state.profile.goalDate;
+  state.profile.availableMinutesToday = minutes;
+
+  renderToday();
+}
+
 function calculateLoadToday() {
   return state.strava.activities.reduce((sum, activity) => sum + activity.load, 0);
 }
@@ -102,6 +118,9 @@ function getSportSpecificHint() {
   }
   if (goal === "10 km") {
     return "Wichtig sind VO2max-Reize, Schwelle und ökonomisches Laufen bei höherem Tempo.";
+  }
+  if (goal === "5 km") {
+    return "Wichtig sind kurze schnelle Intervalle, Laufökonomie und gute Erholung zwischen harten Tagen.";
   }
   if (goal === "Ski Marathon Skating") {
     return "Wichtig sind lange Ausdauerblöcke, Oberkörperkraft, Schwelle und Technik unter Ermüdung.";
@@ -269,6 +288,7 @@ function buildCoachAnswer(question) {
   const focus = state.profile.focus;
   const days = daysUntilGoal();
   const hint = getSportSpecificHint();
+  const minutes = state.profile.availableMinutesToday;
 
   if (q.includes("heute")) {
     return `Heute empfohlen: ${recommendation.title}. Warum: Readiness ${state.garmin.readiness}, Schlaf ${state.garmin.sleep}, Body Battery ${state.garmin.bodyBattery} und Load ${load}. Für dein Ziel ${goal} in der Phase ${phase} gilt: ${hint}`;
@@ -276,7 +296,7 @@ function buildCoachAnswer(question) {
 
   if (q.includes("intervall")) {
     if (state.garmin.readiness >= 70) {
-      return `Ja, Intervalle sind heute möglich. Für dein Ziel ${goal} würde ich heute eher kontrolliert hart statt maximal hart trainieren. ${hint}`;
+      return `Ja, Intervalle sind heute möglich. Für dein Ziel ${goal} würde ich heute eher kontrolliert hart statt maximal hart trainieren. Achte darauf, dass die Einheit in deine verfügbaren ${minutes} Minuten passt. ${hint}`;
     }
     return `Heute noch keine harten Intervalle. Deine Frische wirkt dafür nicht ideal. Besser locker trainieren und morgen neu schauen.`;
   }
@@ -345,6 +365,13 @@ function formatGermanDate() {
 }
 
 document.getElementById("current-date").textContent = formatGermanDate();
+
+document.getElementById("sport-select").value = state.profile.primarySport;
+document.getElementById("goal-select").value = state.profile.goal;
+document.getElementById("focus-select").value = state.profile.focus;
+document.getElementById("goal-date-input").value = state.profile.goalDate;
+document.getElementById("minutes-input").value = state.profile.availableMinutesToday;
+
 renderToday();
 renderActivities();
 renderCalendar();

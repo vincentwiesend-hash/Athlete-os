@@ -1,279 +1,156 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Athlete OS">
-<title>Athlete OS | High Performance</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg:#0a0a0f;--surface:#12121a;--border:rgba(255,255,255,0.07);--text:#f0f0f8;
-  --muted:rgba(240,240,248,0.45);--accent:#c8f135;--accent2:#6c63ff;
-  --red:#ff4d6d;--orange:#ff8c42;--teal:#3dffc0;
-  --font-display:'Syne',sans-serif;--font-mono:'DM Mono',monospace;
-  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
-}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{background:var(--bg);color:var(--text);font-family:var(--font-display);min-height:100vh;overflow-x:hidden;padding-top:var(--safe-top);padding-bottom:calc(80px + var(--safe-bottom));}
-.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,15,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding-bottom:var(--safe-bottom);z-index:100;}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 0;gap:4px;border:none;background:none;cursor:pointer;color:var(--muted);font-family:var(--font-display);font-size:10px;letter-spacing:0.05em;text-transform:uppercase;transition:color 0.2s;}
-.nav-btn.active{color:var(--accent);}
-.nav-icon{font-size:20px;line-height:1;}
-.header{padding:20px 20px 0;display:flex;align-items:center;justify-content:space-between;}
-.header-greeting{font-size:13px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-mono);}
-.header-date{font-size:11px;color:var(--muted);font-family:var(--font-mono);}
-.screen{display:none;padding:0 16px;}
-.screen.active{display:block;}
-.section-title{font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin:24px 0 12px;}
-.recovery-hero{margin:20px 0;display:flex;flex-direction:column;align-items:center;}
-.ring-wrap{position:relative;width:220px;height:220px;}
-.ring-wrap svg{transform:rotate(-90deg);}
-.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.ring-score{font-size:64px;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--accent),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.ring-label{font-size:11px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;font-family:var(--font-mono);margin-top:4px;}
-.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;position:relative;overflow:hidden;}
-.metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent-color,var(--accent));}
-.metric-label{font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-mono);}
-.metric-value{font-size:28px;font-weight:700;margin:6px 0 2px;line-height:1;}
-.metric-unit{font-size:11px;color:var(--muted);font-family:var(--font-mono);}
-.activity-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;}
-.activity-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-.activity-icon.run{background:rgba(200,241,53,0.12);}
-.activity-icon.ride{background:rgba(109,99,255,0.15);}
-.activity-name{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.activity-stats{display:flex;gap:12px;margin-top:8px;}
-.activity-stat{font-size:12px;font-family:var(--font-mono);color:var(--muted);}
-.activity-stat span{color:var(--text);font-weight:500;}
-.activity-right{margin-left:auto;text-align:right;flex-shrink:0;}
-.activity-dist{font-size:18px;font-weight:700;}
-.token-section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin:12px 0;}
-.token-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:var(--font-mono);font-size:12px;margin-bottom:10px;}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:10px;font-family:var(--font-display);font-size:13px;font-weight:600;letter-spacing:0.05em;cursor:pointer;border:none;transition:all 0.2s;}
-.btn-accent{background:var(--accent);color:#0a0a0f;width:100%;}
-.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);}
-.ai-card{background:linear-gradient(135deg,rgba(108,99,255,0.15),rgba(61,255,192,0.08));border:1px solid rgba(108,99,255,0.3);border-radius:20px;padding:20px;margin-bottom:10px;}
-.ai-message{font-size:14px;line-height:1.7;color:rgba(240,240,248,0.9);}
-.ai-message strong{color:var(--accent);font-weight:600;}
-.ask-input-wrap{display:flex;gap:8px;margin-top:12px;}
-.ask-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:var(--font-display);font-size:13px;}
-.btn-send{width:42px;height:42px;border-radius:10px;background:var(--accent2);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:white;}
-.status-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;font-size:11px;font-family:var(--font-mono);}
-.status-ok{background:rgba(200,241,53,0.1);color:var(--accent);}
-.history-row{background:rgba(255,255,255,0.04);border-radius:12px;padding:12px 14px;margin:8px 0;font-size:14px;}
-::-webkit-scrollbar{display:none;}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Athlete OS" />
+  <title>Athlete OS | High Performance</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-<div class="header">
-  <div>
-    <div class="header-greeting">Athlete OS</div>
-    <div class="header-date" id="current-date"></div>
-  </div>
-  <div id="connection-status" class="status-pill status-ok"><div class="dot"></div> System Aktiv</div>
-</div>
-
-<div class="screen active" id="screen-today">
-  <div class="section-title">Garmin Readiness</div>
-  <div class="recovery-hero">
-    <div class="ring-wrap">
-      <svg width="220" height="220" viewBox="0 0 220 220">
-        <circle cx="110" cy="110" r="95" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="14"/>
-        <circle id="recovery-ring" cx="110" cy="110" r="95" fill="none" stroke="url(#ringGrad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="597" stroke-dashoffset="597"/>
-        <defs><linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#c8f135"/><stop offset="100%" stop-color="#3dffc0"/></linearGradient></defs>
-      </svg>
-      <div class="ring-center">
-        <div class="ring-score" id="readiness-score">--</div>
-        <div class="ring-label">Readiness</div>
-      </div>
+  <div class="header">
+    <div>
+      <div class="header-greeting">Athlete OS</div>
+      <div class="header-date" id="current-date"></div>
+    </div>
+    <div id="connection-status" class="status-pill status-ok">
+      <div class="dot"></div>
+      System Aktiv
     </div>
   </div>
-  
-  <div class="metric-grid">
-    <div class="metric-card" style="--accent-color:var(--accent2)"><div class="metric-label">HRV Status</div><div class="metric-value" id="hrv-val">--</div><div class="metric-unit">ms</div></div>
-    <div class="metric-card" style="--accent-color:var(--orange)"><div class="metric-label">Strain (Strava)</div><div class="metric-value" id="strain-val">--</div><div class="metric-unit">/ 21</div></div>
-    <div class="metric-card" style="--accent-color:var(--teal)"><div class="metric-label">Schlaf Score</div><div class="metric-value" id="sleep-val">--</div><div class="metric-unit">/ 100</div></div>
-    <div class="metric-card" style="--accent-color:var(--red)"><div class="metric-label">Body Battery</div><div class="metric-value" id="bb-val">--</div><div class="metric-unit">%</div></div>
-  </div>
-</div>
 
-<div class="screen" id="screen-activities">
-  <div class="section-title">Strava Aktivitäten</div>
-  <div id="activities-list"><div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--font-mono);">Keine Aktivitäten geladen.</div></div>
-</div>
+  <div class="screen active" id="screen-today">
+    <div class="section-title">Today</div>
 
-<div class="screen" id="screen-coach">
-  <div class="section-title">KI Coach (Gemini 1.5)</div>
-  <div class="ai-card">
-    <div class="ai-message" id="coach-message">Analysiere deine physiologische Diskrepanz... 🧬</div>
-  </div>
-  <div class="ask-input-wrap">
-    <input class="ask-input" id="coach-input" placeholder="Frag nach Trainingstipps..." onkeydown="if(event.key==='Enter')askCoach()"/>
-    <button class="btn-send" onclick="askCoach()">↑</button>
-  </div>
-  <div id="coach-history"></div>
-</div>
+    <div class="recovery-hero">
+      <div class="ring-wrap">
+        <svg width="220" height="220" viewBox="0 0 220 220">
+          <circle cx="110" cy="110" r="95" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="14"></circle>
+          <circle
+            id="recovery-ring"
+            cx="110"
+            cy="110"
+            r="95"
+            fill="none"
+            stroke="url(#ringGrad)"
+            stroke-width="14"
+            stroke-linecap="round"
+            stroke-dasharray="597"
+            stroke-dashoffset="597"
+          ></circle>
+          <defs>
+            <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#c8f135"></stop>
+              <stop offset="100%" stop-color="#3dffc0"></stop>
+            </linearGradient>
+          </defs>
+        </svg>
 
-<div class="screen" id="screen-data">
-  <div class="section-title">API Konfiguration</div>
-  <div class="token-section">
-    <h3>🔑 Google Gemini API</h3>
-    <p>Erforderlich für den Coach</p>
-    <input class="token-input" id="gemini-key" type="password" placeholder="Gemini API Key einfügen..."/>
-    
-    <h3 style="margin-top:15px;">🏃 Strava Access</h3>
-    <input class="token-input" id="strava-token" type="password" placeholder="Strava Access Token..."/>
-    
-    <button class="btn btn-accent" onclick="saveKeys()">Konfiguration Speichern</button>
-  </div>
-  <div class="section-title">Daten Sync</div>
-  <button class="btn btn-outline" style="width:100%;" onclick="connectStrava()">Strava Daten jetzt laden</button>
-  <p style="font-size:10px; color:var(--muted); margin-top:12px; font-family:var(--font-mono);">Hinweis: Garmin-Daten müssen aktuell noch via Backend/JSON bereitgestellt werden.</p>
-</div>
-
-<nav class="nav">
-  <button class="nav-btn active" onclick="showScreen('today',this)"><span class="nav-icon">◎</span>Heute</button>
-  <button class="nav-btn" onclick="showScreen('activities',this)"><span class="nav-icon">⚡</span>Training</button>
-  <button class="nav-btn" onclick="showScreen('coach',this)"><span class="nav-icon">✦</span>Coach</button>
-  <button class="nav-btn" onclick="showScreen('data',this)"><span class="nav-icon">◈</span>Setup</button>
-</nav>
-
-<script>
-const state = {
-  stravaToken: localStorage.getItem('strava_token'),
-  geminiKey: localStorage.getItem('gemini_key'),
-  activities: JSON.parse(localStorage.getItem('strava_activities') || '[]'),
-  garminData: { readiness: 85, hrv: 62, sleep: 78, bodyBattery: 90 } // Dummy - wird später durch API ersetzt
-};
-
-function saveKeys() {
-  const gK = document.getElementById('gemini-key').value.trim();
-  const sT = document.getElementById('strava-token').value.trim();
-  if(gK) { localStorage.setItem('gemini_key', gK); state.geminiKey = gK; }
-  if(sT) { localStorage.setItem('strava_token', sT); state.stravaToken = sT; }
-  alert("Keys lokal gespeichert!");
-}
-
-function showScreen(name, btn) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
-  btn.classList.add('active');
-  if(name === 'today') renderToday();
-  if(name === 'activities') renderActivities();
-}
-
-// Physiologische Strain Berechnung (Skalierung Strava Suffer Score -> Whoop 21 Scale)
-function calculateStrain() {
-  if (!state.activities.length) return 0;
-  const today = new Date().toISOString().split('T')[0];
-  const dailySuffer = state.activities
-    .filter(a => a.start_date_local.startsWith(today))
-    .reduce((sum, a) => sum + (a.suffer_score || 0), 0);
-  
-  if (dailySuffer === 0) return 0.0;
-  // Logarithmische Annäherung an die Whoop-Skala (Suffer Score von 150 = Strain ca. 18-19)
-  return Math.min(21, (Math.log10(dailySuffer + 1) * 7)).toFixed(1);
-}
-
-function renderToday() {
-  const strain = calculateStrain();
-  document.getElementById('readiness-score').textContent = state.garminData.readiness;
-  document.getElementById('hrv-val').textContent = state.garminData.hrv;
-  document.getElementById('sleep-val').textContent = state.garminData.sleep;
-  document.getElementById('bb-val').textContent = state.garminData.bodyBattery;
-  document.getElementById('strain-val').textContent = strain;
-  
-  const ring = document.getElementById('recovery-ring');
-  const offset = 597 - (state.garminData.readiness / 100) * 597;
-  ring.style.strokeDashoffset = offset;
-}
-
-async function connectStrava() {
-  if (!state.stravaToken) return alert("Bitte erst Strava Token im Setup hinterlegen.");
-  try {
-    const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=10', {
-      headers: { 'Authorization': 'Bearer ' + state.stravaToken }
-    });
-    state.activities = await r.json();
-    localStorage.setItem('strava_activities', JSON.stringify(state.activities));
-    renderActivities();
-    renderToday();
-    alert("Aktivitäten synchronisiert!");
-  } catch (e) { console.error(e); }
-}
-
-function renderActivities() {
-  const list = document.getElementById('activities-list');
-  if (!state.activities.length) return;
-  list.innerHTML = state.activities.map(a => `
-    <div class="activity-card">
-      <div class="activity-icon ${a.type === 'Run' ? 'run' : 'ride'}">${a.type === 'Run' ? '🏃' : '🚴'}</div>
-      <div style="flex:1;">
-        <div class="activity-name">${a.name}</div>
-        <div class="activity-stats">
-          <div class="activity-stat">Effort: <span>${a.suffer_score || '--'}</span></div>
-          <div class="activity-stat">Dist: <span>${(a.distance/1000).toFixed(1)}km</span></div>
+        <div class="ring-center">
+          <div class="ring-score" id="readiness-score">78</div>
+          <div class="ring-label">Readiness</div>
         </div>
       </div>
-      <div class="activity-right">
-        <div class="activity-dist">${Math.floor(a.moving_time/60)}</div>
-        <div style="font-size:10px; color:var(--muted)">min</div>
+    </div>
+
+    <div class="coach-summary-card">
+      <div class="coach-summary-label">Heute empfohlen</div>
+      <div class="coach-summary-title" id="today-title">45–60 min locker</div>
+      <div class="coach-summary-text" id="today-text">
+        Schlaf okay, Belastung moderat. Heute passt eine lockere Einheit besser als voll hart.
       </div>
     </div>
-  `).join('');
-}
 
-async function askCoach() {
-  const input = document.getElementById('coach-input');
-  const question = input.value.trim();
-  if (!question || !state.geminiKey) return alert("Bitte Frage eingeben und Gemini Key im Setup prüfen.");
-  
-  input.value = '';
-  const history = document.getElementById('coach-history');
-  const aiDiv = document.createElement('div');
-  aiDiv.className = 'ai-card';
-  aiDiv.innerHTML = '<div class="ai-message">⏳ Coach analysiert physiologische Daten...</div>';
-  history.prepend(aiDiv);
+    <div class="quick-actions">
+      <button class="quick-btn" onclick="useQuickQuestion('Was soll ich heute trainieren?')">Heute trainieren?</button>
+      <button class="quick-btn" onclick="useQuickQuestion('Bin ich fit für Intervalle?')">Intervalle?</button>
+      <button class="quick-btn" onclick="useQuickQuestion('Soll ich heute pausieren?')">Pause?</button>
+      <button class="quick-btn" onclick="useQuickQuestion('Wie plane ich die nächsten 3 Tage?')">3 Tage planen</button>
+    </div>
 
-  const strain = calculateStrain();
-  const prompt = `
-    Rolle: Sportphysiologe & Coach für Elite-Athleten.
-    User-Hintergrund: Medizinstudent (nutze Fachbegriffe wie HFV, Sympathikotonus, Superkompensation).
-    
-    Aktuelle Daten:
-    - Garmin Trainingsbereitschaft: ${state.garminData.readiness}/100
-    - Berechneter Tages-Strain (basierend auf Strava): ${strain}/21
-    - Letzter Schlaf-Score: ${state.garminData.sleep}/100
-    - HRV: ${state.garminData.hrv}ms
-    
-    Frage: ${question}
-    
-    Anweisung: Analysiere kurz und prägnant. Vergleiche die Belastung (Strain) mit der Regenerationsfähigkeit. 
-    Gib eine klare Empfehlung für das heutige Training (z.B. Schwellentraining, Recovery oder Deload).
-  `;
+    <div class="metric-grid">
+      <div class="metric-card" style="--accent-color:var(--accent2)">
+        <div class="metric-label">HRV</div>
+        <div class="metric-value" id="hrv-val">62</div>
+        <div class="metric-unit">ms</div>
+      </div>
 
-  try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${state.geminiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-    });
-    const data = await response.json();
-    const answer = data.candidates[0].content.parts[0].text;
-    aiDiv.innerHTML = `<div class="ai-message">${answer.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`;
-  } catch (e) {
-    aiDiv.innerHTML = '<div class="ai-message">❌ Fehler beim Abrufen der KI-Analyse.</div>';
-  }
-}
+      <div class="metric-card" style="--accent-color:var(--orange)">
+        <div class="metric-label">Load heute</div>
+        <div class="metric-value" id="load-val">42</div>
+        <div class="metric-unit">Score</div>
+      </div>
 
-// Initialisierung
-document.getElementById('current-date').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
-renderToday();
-</script>
+      <div class="metric-card" style="--accent-color:var(--teal)">
+        <div class="metric-label">Schlaf</div>
+        <div class="metric-value" id="sleep-val">78</div>
+        <div class="metric-unit">/ 100</div>
+      </div>
+
+      <div class="metric-card" style="--accent-color:var(--red)">
+        <div class="metric-label">Body Battery</div>
+        <div class="metric-value" id="bb-val">90</div>
+        <div class="metric-unit">%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-activities">
+    <div class="section-title">Training</div>
+    <div id="activities-list"></div>
+  </div>
+
+  <div class="screen" id="screen-coach">
+    <div class="section-title">Coach</div>
+    <div class="ai-card">
+      <div class="ai-message" id="coach-message">
+        Frag einfach: „Was soll ich heute trainieren?“
+      </div>
+    </div>
+
+    <div class="ask-input-wrap">
+      <input
+        class="ask-input"
+        id="coach-input"
+        placeholder="Frag nach deinem heutigen Training..."
+        onkeydown="if(event.key==='Enter')askCoach()"
+      />
+      <button class="btn-send" onclick="askCoach()">↑</button>
+    </div>
+
+    <div id="coach-history"></div>
+  </div>
+
+  <div class="screen" id="screen-calendar">
+    <div class="section-title">Kalender</div>
+    <div class="calendar-card">
+      <div class="calendar-week" id="calendar-week"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-data">
+    <div class="section-title">Setup</div>
+
+    <div class="token-section">
+      <h3>Demo-Modus</h3>
+      <p class="setup-text">
+        Aktuell läuft die App mit Demo-Daten. Garmin, Strava und Coach-API binden wir später sauber über ein Backend an.
+      </p>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showScreen('today', this)"><span class="nav-icon">◎</span>Heute</button>
+    <button class="nav-btn" onclick="showScreen('activities', this)"><span class="nav-icon">⚡</span>Training</button>
+    <button class="nav-btn" onclick="showScreen('coach', this)"><span class="nav-icon">✦</span>Coach</button>
+    <button class="nav-btn" onclick="showScreen('calendar', this)"><span class="nav-icon">◷</span>Kalender</button>
+    <button class="nav-btn" onclick="showScreen('data', this)"><span class="nav-icon">◈</span>Setup</button>
+  </nav>
+
+  <script src="app.js"></script>
 </body>
 </html>

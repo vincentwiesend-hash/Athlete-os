@@ -136,9 +136,46 @@
     <div class="section-title">Setup</div>
 
     <div class="token-section">
-      <h3>Demo-Modus</h3>
-      <p class="setup-text">
-        Aktuell läuft die App mit Demo-Daten. Garmin, Strava und Coach-API binden wir später sauber über ein Backend an.
+      <h3>Athleten-Profil</h3>
+
+      <label class="setup-label" for="sport-select">Sportart</label>
+      <select id="sport-select" class="setup-select" onchange="updateProfile()">
+        <option value="Run">Laufen</option>
+        <option value="Ride">Radfahren</option>
+        <option value="Ski">Ski Skating</option>
+        <option value="Mixed">Mixed</option>
+      </select>
+
+      <label class="setup-label" for="goal-select">Ziel</label>
+      <select id="goal-select" class="setup-select" onchange="updateProfile()">
+        <option value="Marathon">Marathon</option>
+        <option value="Halbmarathon">Halbmarathon</option>
+        <option value="10 km">10 km</option>
+        <option value="5 km">5 km</option>
+        <option value="Ski Marathon Skating">Ski Marathon Skating</option>
+        <option value="Radrennen">Radrennen</option>
+        <option value="Gran Fondo">Gran Fondo</option>
+        <option value="VO2max verbessern">VO2max verbessern</option>
+        <option value="Grundlagenausdauer verbessern">Grundlagenausdauer verbessern</option>
+      </select>
+
+      <label class="setup-label" for="focus-select">Fokus</label>
+      <select id="focus-select" class="setup-select" onchange="updateProfile()">
+        <option value="VO2max verbessern">VO2max verbessern</option>
+        <option value="Grundlagenausdauer verbessern">Grundlagenausdauer verbessern</option>
+        <option value="Schwelle verbessern">Schwelle verbessern</option>
+        <option value="Wettkampf schaffen">Wettkampf schaffen</option>
+        <option value="Wieder in Form kommen">Wieder in Form kommen</option>
+      </select>
+
+      <label class="setup-label" for="goal-date-input">Wettkampfdatum</label>
+      <input id="goal-date-input" class="setup-input" type="date" onchange="updateProfile()" />
+
+      <label class="setup-label" for="minutes-input">Verfügbare Minuten heute</label>
+      <input id="minutes-input" class="setup-input" type="number" value="60" min="10" max="300" onchange="updateProfile()" />
+
+      <p class="setup-text" style="margin-top:12px;">
+        Änderungen wirken direkt auf Coach, Today-Screen und Empfehlungen.
       </p>
     </div>
   </div>

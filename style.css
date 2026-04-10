@@ -120,18 +120,28 @@ body {
 .ai-card,
 .calendar-card,
 .metric-card,
-.activity-card {
+.activity-card,
+.plan-card,
+.option-card,
+.coach-profile-card,
+.goal-card {
   background:var(--surface);
   border:1px solid var(--border);
   border-radius:16px;
 }
 
-.coach-summary-card {
+.coach-summary-card,
+.plan-card,
+.coach-profile-card,
+.goal-card {
   padding:18px;
   margin-bottom:14px;
 }
 
-.coach-summary-label {
+.coach-summary-label,
+.plan-label,
+.option-label,
+.goal-card-label {
   font-size:10px;
   color:var(--muted);
   letter-spacing:0.1em;
@@ -140,7 +150,9 @@ body {
   margin-bottom:8px;
 }
 
-.coach-summary-title {
+.coach-summary-title,
+.plan-main,
+.goal-card-main {
   font-size:24px;
   font-weight:700;
   margin-bottom:8px;
@@ -148,10 +160,32 @@ body {
 
 .coach-summary-text,
 .setup-text,
-.ai-message {
+.ai-message,
+.plan-sub,
+.calendar-summary-text,
+.option-text,
+.coach-profile-line,
+.goal-card-text {
   font-size:14px;
   line-height:1.6;
   color:rgba(240,240,248,0.9);
+}
+
+.option-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.option-card {
+  padding:16px;
+}
+
+.option-title {
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:6px;
 }
 
 .quick-actions {
@@ -311,6 +345,20 @@ body {
 .calendar-card {
   padding:20px;
   margin:12px 0;
+}
+
+.calendar-summary {
+  margin-bottom:16px;
+}
+
+.calendar-summary-title,
+.coach-profile-title {
+  font-size:12px;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-family:var(--font-mono);
+  margin-bottom:8px;
 }
 
 .calendar-week {

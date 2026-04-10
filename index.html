@@ -19,7 +19,7 @@
     </div>
     <div id="connection-status" class="status-pill status-ok">
       <div class="dot"></div>
-      System Aktiv
+      Demo Modus
     </div>
   </div>
 
@@ -65,11 +65,39 @@
       </div>
     </div>
 
+    <div class="plan-card">
+      <div class="plan-label">Dein Fokus</div>
+      <div class="plan-main" id="focus-line">Halbmarathon · VO2max verbessern</div>
+      <div class="plan-sub" id="phase-line">Phase: Aufbau · 140 Tage bis Ziel</div>
+    </div>
+
+    <div class="goal-card">
+      <div class="goal-card-label">Zielorientierte Empfehlung</div>
+      <div class="goal-card-main" id="weekly-target-title">4–5 Einheiten pro Woche</div>
+      <div class="goal-card-text" id="weekly-target-text">
+        Für dein Ziel sind aktuell 1 Qualitätsreiz, 1 längere Einheit und 2–3 lockere Einheiten sinnvoll.
+      </div>
+    </div>
+
+    <div class="option-grid">
+      <div class="option-card">
+        <div class="option-label">Option A</div>
+        <div class="option-title" id="option-a-title">Schlüsseleinheit</div>
+        <div class="option-text" id="option-a-text">5 x 3 min zügig mit lockerer Pause</div>
+      </div>
+
+      <div class="option-card">
+        <div class="option-label">Option B</div>
+        <div class="option-title" id="option-b-title">Alternative</div>
+        <div class="option-text" id="option-b-text">40–50 min locker + 4 Steigerungen</div>
+      </div>
+    </div>
+
     <div class="quick-actions">
       <button class="quick-btn" onclick="useQuickQuestion('Was soll ich heute trainieren?')">Heute trainieren?</button>
+      <button class="quick-btn" onclick="useQuickQuestion('Wie viel sollte ich pro Woche trainieren?')">Wochenumfang</button>
       <button class="quick-btn" onclick="useQuickQuestion('Bin ich fit für Intervalle?')">Intervalle?</button>
-      <button class="quick-btn" onclick="useQuickQuestion('Soll ich heute pausieren?')">Pause?</button>
-      <button class="quick-btn" onclick="useQuickQuestion('Wie plane ich die nächsten 3 Tage?')">3 Tage planen</button>
+      <button class="quick-btn" onclick="useQuickQuestion('Gib mir einen Wochenplan')">Wochenplan</button>
     </div>
 
     <div class="metric-grid">
@@ -106,9 +134,16 @@
 
   <div class="screen" id="screen-coach">
     <div class="section-title">Coach</div>
+
+    <div class="coach-profile-card">
+      <div class="coach-profile-title">Athleten-Profil</div>
+      <div class="coach-profile-line" id="coach-profile-line-1">Laufen · Halbmarathon · VO2max verbessern</div>
+      <div class="coach-profile-line" id="coach-profile-line-2">Readiness 78 · Schlaf 78 · Load 128</div>
+    </div>
+
     <div class="ai-card">
       <div class="ai-message" id="coach-message">
-        Frag einfach: „Was soll ich heute trainieren?“
+        Frag einfach: „Wie viel sollte ich pro Woche trainieren?“
       </div>
     </div>
 
@@ -116,7 +151,7 @@
       <input
         class="ask-input"
         id="coach-input"
-        placeholder="Frag nach deinem heutigen Training..."
+        placeholder="Frag nach Ziel, Wochenumfang oder Training..."
         onkeydown="if(event.key==='Enter')askCoach()"
       />
       <button class="btn-send" onclick="askCoach()">↑</button>
@@ -128,6 +163,10 @@
   <div class="screen" id="screen-calendar">
     <div class="section-title">Kalender</div>
     <div class="calendar-card">
+      <div class="calendar-summary">
+        <div class="calendar-summary-title" id="calendar-summary-title">Wochenfokus</div>
+        <div class="calendar-summary-text" id="calendar-summary-text">1 Qualitätstag, 1 längere Einheit, 2 lockere Tage</div>
+      </div>
       <div class="calendar-week" id="calendar-week"></div>
     </div>
   </div>
@@ -171,11 +210,11 @@
       <label class="setup-label" for="goal-date-input">Wettkampfdatum</label>
       <input id="goal-date-input" class="setup-input" type="date" onchange="updateProfile()" />
 
-      <label class="setup-label" for="minutes-input">Verfügbare Minuten heute</label>
-      <input id="minutes-input" class="setup-input" type="number" value="60" min="10" max="300" onchange="updateProfile()" />
+      <label class="setup-label" for="days-input">Trainings-Tage pro Woche</label>
+      <input id="days-input" class="setup-input" type="number" value="5" min="2" max="14" onchange="updateProfile()" />
 
       <p class="setup-text" style="margin-top:12px;">
-        Änderungen wirken direkt auf Coach, Today-Screen und Empfehlungen.
+        Die App schlägt dir daraus vor, wie viel du ungefähr trainieren solltest, um dein Ziel sinnvoll zu erreichen.
       </p>
     </div>
   </div>

@@ -376,7 +376,7 @@ async function callGroq(prompt){
     const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer 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'},
-      body:JSON.stringify({model:'mixtral-8x7b-32768',messages:[{role:'user',content:prompt}],max_tokens:1000})
+      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1000})
     });
     const d=await r.json();
     if(d.error)return '❌ '+d.error.message;

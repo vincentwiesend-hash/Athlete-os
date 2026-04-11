@@ -1,6 +1,7 @@
 :root {
   --bg:#0a0a0f;
   --surface:#12121a;
+  --surface2:#171722;
   --border:rgba(255,255,255,0.07);
   --text:#f0f0f8;
   --muted:rgba(240,240,248,0.45);
@@ -71,63 +72,72 @@ body {
   margin:24px 0 12px;
 }
 
-.recovery-hero {
-  margin:20px 0;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+.hero-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px;
+  margin-bottom:14px;
 }
 
-.ring-wrap {
-  position:relative;
-  width:220px;
-  height:220px;
-}
-
-.ring-wrap svg {
-  transform:rotate(-90deg);
-}
-
-.ring-center {
-  position:absolute;
-  inset:0;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-}
-
-.ring-score {
-  font-size:64px;
-  font-weight:800;
-  line-height:1;
-  background:linear-gradient(135deg,var(--accent),var(--teal));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-
-.ring-label {
-  font-size:11px;
-  color:var(--muted);
-  letter-spacing:0.15em;
-  text-transform:uppercase;
-  font-family:var(--font-mono);
-  margin-top:4px;
-}
-
+.hero-card,
 .coach-summary-card,
 .token-section,
 .ai-card,
 .calendar-card,
-.metric-card,
 .activity-card,
 .plan-card,
 .option-card,
 .coach-profile-card,
-.goal-card {
+.goal-card,
+.mini-card,
+.dashboard-card {
   background:var(--surface);
   border:1px solid var(--border);
   border-radius:16px;
+}
+
+.hero-card {
+  padding:16px;
+  min-height:120px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.hero-label,
+.coach-summary-label,
+.plan-label,
+.option-label,
+.goal-card-label,
+.mini-label,
+.dashboard-label {
+  font-size:10px;
+  color:var(--muted);
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  font-family:var(--font-mono);
+  margin-bottom:8px;
+}
+
+.hero-value {
+  font-size:34px;
+  font-weight:800;
+  line-height:1;
+}
+
+.hero-sub,
+.plan-sub,
+.coach-summary-text,
+.goal-card-text,
+.option-text,
+.setup-text,
+.ai-message,
+.coach-profile-line,
+.calendar-summary-text,
+.dashboard-sub {
+  font-size:14px;
+  line-height:1.6;
+  color:rgba(240,240,248,0.9);
 }
 
 .coach-summary-card,
@@ -138,18 +148,6 @@ body {
   margin-bottom:14px;
 }
 
-.coach-summary-label,
-.plan-label,
-.option-label,
-.goal-card-label {
-  font-size:10px;
-  color:var(--muted);
-  letter-spacing:0.1em;
-  text-transform:uppercase;
-  font-family:var(--font-mono);
-  margin-bottom:8px;
-}
-
 .coach-summary-title,
 .plan-main,
 .goal-card-main {
@@ -158,27 +156,17 @@ body {
   margin-bottom:8px;
 }
 
-.coach-summary-text,
-.setup-text,
-.ai-message,
-.plan-sub,
-.calendar-summary-text,
-.option-text,
-.coach-profile-line,
-.goal-card-text {
-  font-size:14px;
-  line-height:1.6;
-  color:rgba(240,240,248,0.9);
-}
-
-.option-grid {
+.option-grid,
+.quick-actions,
+.mini-grid {
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:10px;
   margin-bottom:14px;
 }
 
-.option-card {
+.option-card,
+.mini-card {
   padding:16px;
 }
 
@@ -188,11 +176,9 @@ body {
   margin-bottom:6px;
 }
 
-.quick-actions {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-bottom:14px;
+.mini-value {
+  font-size:22px;
+  font-weight:700;
 }
 
 .quick-btn {
@@ -206,47 +192,8 @@ body {
   cursor:pointer;
 }
 
-.metric-grid {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-.metric-card {
-  padding:16px;
-  position:relative;
-  overflow:hidden;
-}
-
-.metric-card::before {
-  content:'';
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  height:2px;
-  background:var(--accent-color,var(--accent));
-}
-
-.metric-label {
-  font-size:10px;
-  color:var(--muted);
-  letter-spacing:0.1em;
-  text-transform:uppercase;
-  font-family:var(--font-mono);
-}
-
-.metric-value {
-  font-size:28px;
-  font-weight:700;
-  margin:6px 0 2px;
-  line-height:1;
-}
-
-.metric-unit {
-  font-size:11px;
-  color:var(--muted);
-  font-family:var(--font-mono);
+.coach-only-actions {
+  margin-bottom:14px;
 }
 
 .activity-card {
@@ -397,6 +344,22 @@ body {
   background:rgba(200,241,53,0.12);
   color:var(--accent);
   font-family:var(--font-mono);
+}
+
+.dashboard-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.dashboard-card {
+  padding:16px;
+}
+
+.dashboard-value {
+  font-size:26px;
+  font-weight:800;
+  margin-bottom:6px;
 }
 
 .status-pill {

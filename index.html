@@ -184,27 +184,7 @@
 
     <div class="screen" id="screen-dashboard">
       <div class="section-title">Dashboard</div>
-
       <div class="dashboard-list" id="dashboard-list"></div>
-
-      <div class="dashboard-detail-card hidden" id="dashboard-detail-card">
-        <div class="dashboard-detail-header">
-          <div>
-            <div class="dashboard-detail-title" id="dashboard-detail-title">HRV</div>
-            <div class="dashboard-detail-sub" id="dashboard-detail-sub">Trend</div>
-          </div>
-          <button class="detail-close" onclick="closeDashboardDetail()">×</button>
-        </div>
-
-        <div class="range-tabs">
-          <button class="range-tab active" onclick="setDashboardRange('7d', this)">7D</button>
-          <button class="range-tab" onclick="setDashboardRange('1m', this)">1M</button>
-          <button class="range-tab" onclick="setDashboardRange('6m', this)">6M</button>
-          <button class="range-tab" onclick="setDashboardRange('12m', this)">12M</button>
-        </div>
-
-        <svg id="dashboard-detail-chart" class="detail-chart" viewBox="0 0 360 180" preserveAspectRatio="none"></svg>
-      </div>
     </div>
 
     <div class="screen" id="screen-data">

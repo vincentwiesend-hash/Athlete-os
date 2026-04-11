@@ -103,7 +103,7 @@ body {
 .coach-profile-card,
 .mini-card,
 .dashboard-row,
-.dashboard-detail-card {
+.dashboard-inline-detail {
   background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
   border:1px solid var(--border);
   border-radius:20px;
@@ -233,8 +233,7 @@ body {
 
 .coach-summary-card,
 .plan-card,
-.coach-profile-card,
-.dashboard-detail-card {
+.coach-profile-card {
   padding:18px;
   margin-bottom:14px;
 }
@@ -253,7 +252,7 @@ body {
 .calendar-summary-text,
 .coach-profile-line,
 .dashboard-row-sub,
-.dashboard-detail-sub {
+.dashboard-inline-sub {
   font-size:14px;
   line-height:1.6;
   color:rgba(244,246,255,0.88);
@@ -455,7 +454,7 @@ body {
 
 .calendar-summary-title,
 .coach-profile-title,
-.dashboard-detail-title {
+.dashboard-inline-title {
   font-size:12px;
   letter-spacing:0.1em;
   text-transform:uppercase;
@@ -508,6 +507,12 @@ body {
   gap:10px;
 }
 
+.dashboard-item {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
 .dashboard-row {
   padding:16px;
   display:flex;
@@ -526,7 +531,11 @@ body {
   font-weight:800;
 }
 
-.dashboard-detail-header {
+.dashboard-inline-detail {
+  padding:16px;
+}
+
+.dashboard-inline-head {
   display:flex;
   align-items:flex-start;
   justify-content:space-between;
@@ -534,7 +543,7 @@ body {
   margin-bottom:12px;
 }
 
-.detail-close {
+.inline-close {
   width:34px;
   height:34px;
   border-radius:10px;

@@ -1,6 +1,7 @@
 const state = {
   dashboardRange: "7d",
   dashboardMetric: "HRV",
+  dashboardOpenMetric: null,
   user: {
     name: "Vincent"
   },
@@ -600,8 +601,10 @@ function metricSeries(metric, range) {
   return map[metric] || [10, 20, 30, 25, 35, 40, 38];
 }
 
-function drawDetailChart(values) {
-  const svg = document.getElementById("dashboard-detail-chart");
+function drawDetailChart(svgId, values) {
+  const svg = document.getElementById(svgId);
+  if (!svg) return;
+
   const width = 360;
   const height = 180;
   const padding = 16;
@@ -625,50 +628,82 @@ function drawDetailChart(values) {
 
   svg.innerHTML = `
     <defs>
-      <linearGradient id="detail-fill" x1="0" y1="0" x2="0" y2="1">
+      <linearGradient id="${svgId}-fill" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="#6c63ff" stop-opacity="0.28"></stop>
         <stop offset="100%" stop-color="#6c63ff" stop-opacity="0"></stop>
       </linearGradient>
     </defs>
     ${gridLines}
-    <path d="${areaPath}" fill="url(#detail-fill)"></path>
+    <path d="${areaPath}" fill="url(#${svgId}-fill)"></path>
     <path d="${linePath}" fill="none" stroke="#6c63ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
     ${points.map(p => `<circle cx="${p.x}" cy="${p.y}" r="2.5" fill="#6c63ff"></circle>`).join("")}
   `;
 }
 
-function openDashboardDetail(metric) {
+function toggleDashboardDetail(metric) {
+  state.dashboardOpenMetric = state.dashboardOpenMetric === metric ? null : metric;
   state.dashboardMetric = metric;
-  document.getElementById("dashboard-detail-card").classList.remove("hidden");
-  document.getElementById("dashboard-detail-title").textContent = metric;
-  document.getElementById("dashboard-detail-sub").textContent = `Trend über ${state.dashboardRange.toUpperCase()}`;
-  drawDetailChart(metricSeries(metric, state.dashboardRange));
+  renderDashboard();
 }
 
-function closeDashboardDetail() {
-  document.getElementById("dashboard-detail-card").classList.add("hidden");
+function closeInlineDetail() {
+  state.dashboardOpenMetric = null;
+  renderDashboard();
 }
 
 function setDashboardRange(range, btn) {
   state.dashboardRange = range;
-  document.querySelectorAll(".range-tab").forEach(tab => tab.classList.remove("active"));
-  btn.classList.add("active");
-  openDashboardDetail(state.dashboardMetric);
+  renderDashboard();
 }
 
 function renderDashboard() {
   const list = document.getElementById("dashboard-list");
-  list.innerHTML = dashboardItems().map(item => `
-    <div class="dashboard-row" onclick="openDashboardDetail('${item.key.replace(/'/g, "\\'")}')">
-      <div>
-        <div class="dashboard-row-label">${item.label}</div>
-        <div class="dashboard-row-sub">${item.sub}</div>
+  const items = dashboardItems();
+
+  list.innerHTML = items.map(item => {
+    const isOpen = state.dashboardOpenMetric === item.key;
+    return `
+      <div class="dashboard-item">
+        <div class="dashboard-row" onclick="toggleDashboardDetail('${item.key.replace(/'/g, "\\'")}')">
+          <div>
+            <div class="dashboard-row-label">${item.label}</div>
+            <div class="dashboard-row-sub">${item.sub}</div>
+          </div>
+          <div class="dashboard-row-right">
+            <div class="dashboard-row-value">${item.value}</div>
+          </div>
+        </div>
+
+        ${isOpen ? `
+          <div class="dashboard-inline-detail">
+            <div class="dashboard-inline-head">
+              <div>
+                <div class="dashboard-inline-title">${item.label}</div>
+                <div class="dashboard-inline-sub">Trend über ${state.dashboardRange.toUpperCase()}</div>
+              </div>
+              <button class="inline-close" onclick="event.stopPropagation(); closeInlineDetail()">×</button>
+            </div>
+
+            <div class="range-tabs">
+              <button class="range-tab ${state.dashboardRange === "7d" ? "active" : ""}" onclick="event.stopPropagation(); setDashboardRange('7d', this)">7D</button>
+              <button class="range-tab ${state.dashboardRange === "1m" ? "active" : ""}" onclick="event.stopPropagation(); setDashboardRange('1m', this)">1M</button>
+              <button class="range-tab ${state.dashboardRange === "6m" ? "active" : ""}" onclick="event.stopPropagation(); setDashboardRange('6m', this)">6M</button>
+              <button class="range-tab ${state.dashboardRange === "12m" ? "active" : ""}" onclick="event.stopPropagation(); setDashboardRange('12m', this)">12M</button>
+            </div>
+
+            <svg id="detail-chart-${item.key.replace(/\s+/g, "-")}" class="detail-chart" viewBox="0 0 360 180" preserveAspectRatio="none"></svg>
+          </div>
+        ` : ""}
       </div>
-      <div class="dashboard-row-right">
-        <div class="dashboard-row-value">${item.value}</div>
-      </div>
-    </div>
-  `).join("");
+    `;
+  }).join("");
+
+  items.forEach(item => {
+    if (state.dashboardOpenMetric === item.key) {
+      const chartId = `detail-chart-${item.key.replace(/\s+/g, "-")}`;
+      drawDetailChart(chartId, metricSeries(item.key, state.dashboardRange));
+    }
+  });
 }
 
 function useQuickQuestion(question) {
@@ -700,21 +735,11 @@ function addCoachMessage(role, text) {
 function getGoalSpecificHint() {
   const goal = state.profile.goal;
 
-  if (goal === "Halbmarathon") {
-    return "Für Halbmarathon zählen vor allem Schwelle, Tempogefühl und ein stabiler Long Run.";
-  }
-  if (goal === "Marathon") {
-    return "Für Marathon zählen Umfang, Long Run und gute Verträglichkeit der Wochenstruktur.";
-  }
-  if (goal === "Ski Marathon Skating") {
-    return "Für Ski Marathon Skating sind Ausdauer, Oberkörperkraft und Technik unter Belastung zentral.";
-  }
-  if (goal === "Radrennen" || goal === "Gran Fondo") {
-    return "Für Radrennen zählen stabile Grundlage, längere Belastungen und gute Energiebereitstellung.";
-  }
-  if (goal === "10 km" || goal === "5 km") {
-    return "Für kürzere Laufziele sind VO2max, Tempoökonomie und gute Erholung zwischen harten Tagen wichtig.";
-  }
+  if (goal === "Halbmarathon") return "Für Halbmarathon zählen vor allem Schwelle, Tempogefühl und ein stabiler Long Run.";
+  if (goal === "Marathon") return "Für Marathon zählen Umfang, Long Run und gute Verträglichkeit der Wochenstruktur.";
+  if (goal === "Ski Marathon Skating") return "Für Ski Marathon Skating sind Ausdauer, Oberkörperkraft und Technik unter Belastung zentral.";
+  if (goal === "Radrennen" || goal === "Gran Fondo") return "Für Radrennen zählen stabile Grundlage, längere Belastungen und gute Energiebereitstellung.";
+  if (goal === "10 km" || goal === "5 km") return "Für kürzere Laufziele sind VO2max, Tempoökonomie und gute Erholung zwischen harten Tagen wichtig.";
   return "Wichtig ist eine gute Balance aus Belastung, Erholung und passendem Fokus.";
 }
 
@@ -843,49 +868,45 @@ function buildCoachAnswer(question) {
   const suggestion = getTodayTrainingSuggestion();
 
   if (q.includes("was soll ich heute trainieren") || q.includes("heute trainieren")) {
-    return `Heute empfohlen: ${suggestion.main}\n\nWarum: ${suggestion.why}\n\nWorauf achten: ${suggestion.watch}`;
+    return `Heute empfohlen: ${suggestion.main}<br><br>Warum: ${suggestion.why}<br><br>Worauf achten: ${suggestion.watch}`;
   }
 
   if (q.includes("interval")) {
     if (state.garmin.recovery >= 75 && calculateDayStrain() < 65) {
-      return `Heute gehen Intervalle eher ja.\n\nWarum: Deine Erholung ist gut und die Tagesbelastung noch nicht zu hoch.\n\nWorauf achten: Kurz und sauber, nicht maximal.`;
+      return `Heute gehen Intervalle eher ja.<br><br>Warum: Deine Erholung ist gut und die Tagesbelastung noch nicht zu hoch.<br><br>Worauf achten: Kurz und sauber, nicht maximal.`;
     }
-    return `Heute eher keine harten Intervalle.\n\nWarum: Deine aktuelle Frische ist dafür nicht ideal.\n\nWorauf achten: Lieber locker oder moderat trainieren.`;
+    return `Heute eher keine harten Intervalle.<br><br>Warum: Deine aktuelle Frische ist dafür nicht ideal.<br><br>Worauf achten: Lieber locker oder moderat trainieren.`;
   }
 
   if (q.includes("wie viel") || q.includes("pro woche") || q.includes("wochenumfang")) {
-    return `Wochenumfang:\n\n${getWeeklyVolumeAnswer()}\n\nWorauf achten: ${hint}`;
+    return `Wochenumfang:<br><br>${getWeeklyVolumeAnswer()}<br><br>Worauf achten: ${hint}`;
   }
 
   if (q.includes("wochenplan") || q.includes("woche")) {
-    return `Wochenplan:\n\n${weekly.title}: ${weekly.text}\n\nWorauf achten: ${hint}`;
+    return `Wochenplan:<br><br>${weekly.title}: ${weekly.text}<br><br>Worauf achten: ${hint}`;
   }
 
   if (q.includes("marathon")) {
-    return `Marathon-Fokus:\n\nFür Marathon zählen Umfang, Long Run und gute Verträglichkeit der Woche.\n\nWarum: Harte Tage funktionieren nur, wenn die ruhigen Tage wirklich ruhig bleiben.\n\nWorauf achten: Nicht zu viele fordernde Reize aufeinander stapeln.`;
+    return `Marathon-Fokus:<br><br>Für Marathon zählen Umfang, Long Run und gute Verträglichkeit der Woche.<br><br>Warum: Harte Tage funktionieren nur, wenn die ruhigen Tage wirklich ruhig bleiben.<br><br>Worauf achten: Nicht zu viele fordernde Reize aufeinander stapeln.`;
   }
 
   if (q.includes("halbmarathon")) {
-    return `Halbmarathon-Fokus:\n\nFür Halbmarathon zählen Schwelle, Tempogefühl und ein stabiler Long Run.\n\nWarum: Genau daraus kommt meist der größte Fortschritt.\n\nWorauf achten: Qualität kontrolliert, nicht hektisch.`;
+    return `Halbmarathon-Fokus:<br><br>Für Halbmarathon zählen Schwelle, Tempogefühl und ein stabiler Long Run.<br><br>Warum: Genau daraus kommt meist der größte Fortschritt.<br><br>Worauf achten: Qualität kontrolliert, nicht hektisch.`;
   }
 
   if (q.includes("vo2") || q.includes("vo2max")) {
-    return `VO2max-Fokus:\n\n1 bis 2 harte Reize pro Woche reichen meistens.\n\nWarum: Mehr ist oft nicht besser, wenn die Erholung nicht mitkommt.\n\nWorauf achten: Nur an frischen Tagen wirklich hart trainieren.`;
+    return `VO2max-Fokus:<br><br>1 bis 2 harte Reize pro Woche reichen meistens.<br><br>Warum: Mehr ist oft nicht besser, wenn die Erholung nicht mitkommt.<br><br>Worauf achten: Nur an frischen Tagen wirklich hart trainieren.`;
   }
 
   if (q.includes("rad")) {
-    return `Rad-Fokus:\n\nGrundlage, längere Belastungen und kontrollierte Qualität bringen dich am weitesten.\n\nWarum: Für Radrennen und Gran Fondo zählt Belastungsverträglichkeit.\n\nWorauf achten: Gleichmäßig fahren, nicht zu viele Spitzen.`;
+    return `Rad-Fokus:<br><br>Grundlage, längere Belastungen und kontrollierte Qualität bringen dich am weitesten.<br><br>Warum: Für Radrennen und Gran Fondo zählt Belastungsverträglichkeit.<br><br>Worauf achten: Gleichmäßig fahren, nicht zu viele Spitzen.`;
   }
 
   if (q.includes("ski")) {
-    return `Ski-Fokus:\n\nLange Ausdauer, Oberkörperkraft und Technik unter Belastung sind zentral.\n\nWarum: Nur Ausdauer allein reicht dafür meist nicht.\n\nWorauf achten: Technik auch unter Müdigkeit sauber halten.`;
+    return `Ski-Fokus:<br><br>Lange Ausdauer, Oberkörperkraft und Technik unter Belastung sind zentral.<br><br>Warum: Nur Ausdauer allein reicht dafür meist nicht.<br><br>Worauf achten: Technik auch unter Müdigkeit sauber halten.`;
   }
 
-  return `Heute empfohlen: ${suggestion.main}\n\nWarum: ${suggestion.why}\n\nWorauf achten: ${suggestion.watch}`;
-}
-
-function formatCoachText(text) {
-  return text.replace(/\n\n/g, "<br><br>");
+  return `Heute empfohlen: ${suggestion.main}<br><br>Warum: ${suggestion.why}<br><br>Worauf achten: ${suggestion.watch}`;
 }
 
 function askCoach() {
@@ -896,7 +917,7 @@ function askCoach() {
   input.value = "";
   addCoachMessage("user", question);
   const answer = buildCoachAnswer(question);
-  addCoachMessage("assistant", formatCoachText(answer));
+  addCoachMessage("assistant", answer);
 }
 
 function formatGermanDate() {

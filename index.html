@@ -12,190 +12,244 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="header">
-    <div>
-      <div class="header-greeting">Athlete OS</div>
-      <div class="header-date" id="current-date"></div>
-    </div>
-    <div id="connection-status" class="status-pill status-ok">
-      <div class="dot"></div>
-      Demo Modus
-    </div>
-  </div>
-
-  <div class="screen active" id="screen-today">
-    <div class="section-title">Heute</div>
-
-    <div class="hero-grid">
-      <div class="hero-card">
-        <div class="hero-label">Erholung</div>
-        <div class="hero-value" id="recovery-value">78</div>
-        <div class="hero-sub">Readiness / 100</div>
+  <div class="app-shell">
+    <div class="header">
+      <div>
+        <div class="header-greeting">Athlete OS</div>
+        <div class="header-date" id="current-date"></div>
       </div>
-
-      <div class="hero-card">
-        <div class="hero-label">Tagesbelastung</div>
-        <div class="hero-value" id="day-strain-value">61</div>
-        <div class="hero-sub">Aktivität + Stress</div>
-      </div>
-
-      <div class="hero-card">
-        <div class="hero-label">Schlaf</div>
-        <div class="hero-value" id="sleep-score-value">82</div>
-        <div class="hero-sub">Score / 100</div>
+      <div id="connection-status" class="status-pill status-ok">
+        <div class="dot"></div>
+        Demo Modus
       </div>
     </div>
 
-    <div class="coach-summary-card">
-      <div class="coach-summary-label">Heute empfohlen</div>
-      <div class="coach-summary-title" id="today-title">Lockere Ausdauer</div>
-      <div class="coach-summary-text" id="today-text">
-        Deine Erholung ist gut, aber die Tagesbelastung ist nicht ganz niedrig. Heute passt eher kontrolliertes Training.
+    <div class="screen active" id="screen-today">
+      <div class="section-title">Heute</div>
+
+      <div class="hero-stack">
+        <div class="hero-card gradient-recovery">
+          <div class="hero-top">
+            <div>
+              <div class="hero-label">Erholung</div>
+              <div class="hero-value" id="recovery-value">78</div>
+              <div class="hero-subline">
+                <span class="pill pill-good" id="recovery-badge">gut</span>
+                <span>Training Readiness</span>
+              </div>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <svg id="recovery-chart" class="spark-chart" viewBox="0 0 320 90" preserveAspectRatio="none"></svg>
+          </div>
+        </div>
+
+        <div class="hero-card gradient-strain">
+          <div class="hero-top">
+            <div>
+              <div class="hero-label">Tagesbelastung</div>
+              <div class="hero-value" id="day-strain-value">61</div>
+              <div class="hero-subline">
+                <span class="pill pill-mid" id="strain-badge">moderat</span>
+                <span>Aktivität + Stress</span>
+              </div>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <svg id="strain-chart" class="spark-chart" viewBox="0 0 320 90" preserveAspectRatio="none"></svg>
+          </div>
+        </div>
+
+        <div class="hero-card gradient-sleep">
+          <div class="hero-top">
+            <div>
+              <div class="hero-label">Schlaf</div>
+              <div class="hero-value" id="sleep-score-value">82</div>
+              <div class="hero-subline">
+                <span class="pill pill-good" id="sleep-badge">gut</span>
+                <span>Sleep Score</span>
+              </div>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <svg id="sleep-chart" class="spark-chart" viewBox="0 0 320 90" preserveAspectRatio="none"></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="coach-summary-card">
+        <div class="coach-summary-label">Heute empfohlen</div>
+        <div class="coach-summary-title" id="today-title">Lockere Ausdauer</div>
+        <div class="coach-summary-text" id="today-text">
+          Deine Erholung ist gut, aber die Tagesbelastung ist nicht ganz niedrig. Heute passt eher kontrolliertes Training.
+        </div>
+      </div>
+
+      <div class="plan-card">
+        <div class="plan-label">Geplante Einheit heute</div>
+        <div class="plan-main" id="planned-session-title">45–60 min locker</div>
+        <div class="plan-sub" id="planned-session-text">Am besten ruhig, gleichmäßig und ohne harte Spitzen.</div>
+      </div>
+
+      <div class="option-grid">
+        <div class="option-card option-primary">
+          <div class="option-label">Option A</div>
+          <div class="option-title" id="option-a-title">Lockerer Dauerlauf</div>
+          <div class="option-text" id="option-a-text">45–60 min locker in ruhigem Bereich.</div>
+        </div>
+
+        <div class="option-card">
+          <div class="option-label">Option B</div>
+          <div class="option-title" id="option-b-title">Recovery</div>
+          <div class="option-text" id="option-b-text">30–40 min sehr locker oder Mobility.</div>
+        </div>
+      </div>
+
+      <div class="mini-grid">
+        <div class="mini-card">
+          <div class="mini-label">Geschlafen</div>
+          <div class="mini-value" id="mini-sleep-hours">7.8 h</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">Erholsamer Schlaf</div>
+          <div class="mini-value" id="mini-restorative-sleep">3.1 h</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">Ruhepuls</div>
+          <div class="mini-value" id="mini-rhr">49</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">HRV</div>
+          <div class="mini-value" id="mini-hrv">62 ms</div>
+        </div>
       </div>
     </div>
 
-    <div class="plan-card">
-      <div class="plan-label">Geplante Einheit heute</div>
-      <div class="plan-main" id="planned-session-title">45–60 min locker</div>
-      <div class="plan-sub" id="planned-session-text">Am besten ruhig, gleichmäßig und ohne harte Spitzen.</div>
+    <div class="screen" id="screen-activities">
+      <div class="section-title">Training</div>
+      <div id="activities-list"></div>
     </div>
 
-    <div class="option-grid">
-      <div class="option-card">
-        <div class="option-label">Option A</div>
-        <div class="option-title" id="option-a-title">Lockerer Dauerlauf</div>
-        <div class="option-text" id="option-a-text">45–60 min locker in ruhigem Bereich.</div>
+    <div class="screen coach-screen" id="screen-coach">
+      <div class="section-title">Coach</div>
+
+      <div class="coach-profile-card">
+        <div class="coach-profile-title">Athleten-Profil</div>
+        <div class="coach-profile-line" id="coach-profile-line-1">Laufen · Halbmarathon · VO2max verbessern</div>
+        <div class="coach-profile-line" id="coach-profile-line-2">Erholung 78 · Schlaf 82 · Tagesbelastung 61</div>
       </div>
 
-      <div class="option-card">
-        <div class="option-label">Option B</div>
-        <div class="option-title" id="option-b-title">Recovery</div>
-        <div class="option-text" id="option-b-text">30–40 min sehr locker oder Mobility.</div>
+      <div class="quick-actions coach-only-actions">
+        <button class="quick-btn" onclick="useQuickQuestion('Was soll ich heute trainieren?')">Heute trainieren?</button>
+        <button class="quick-btn" onclick="useQuickQuestion('Wie viel sollte ich pro Woche trainieren?')">Wochenumfang</button>
+        <button class="quick-btn" onclick="useQuickQuestion('Bin ich fit für Intervalle?')">Intervalle?</button>
+        <button class="quick-btn" onclick="useQuickQuestion('Gib mir einen Wochenplan')">Wochenplan</button>
       </div>
-    </div>
 
-    <div class="mini-grid">
-      <div class="mini-card">
-        <div class="mini-label">Geschlafen</div>
-        <div class="mini-value" id="mini-sleep-hours">7.8 h</div>
+      <div class="coach-thread" id="coach-thread">
+        <div class="message message-assistant">
+          <div class="message-role">Coach</div>
+          <div class="message-bubble">
+            Frag einfach: „Was soll ich heute trainieren?“
+          </div>
+        </div>
       </div>
-      <div class="mini-card">
-        <div class="mini-label">Erholsamer Schlaf</div>
-        <div class="mini-value" id="mini-restorative-sleep">3.1 h</div>
-      </div>
-      <div class="mini-card">
-        <div class="mini-label">Ruhepuls</div>
-        <div class="mini-value" id="mini-rhr">49</div>
-      </div>
-      <div class="mini-card">
-        <div class="mini-label">HRV</div>
-        <div class="mini-value" id="mini-hrv">62 ms</div>
-      </div>
-    </div>
-  </div>
 
-  <div class="screen" id="screen-activities">
-    <div class="section-title">Training</div>
-    <div id="activities-list"></div>
-  </div>
-
-  <div class="screen" id="screen-coach">
-    <div class="section-title">Coach</div>
-
-    <div class="coach-profile-card">
-      <div class="coach-profile-title">Athleten-Profil</div>
-      <div class="coach-profile-line" id="coach-profile-line-1">Laufen · Halbmarathon · VO2max verbessern</div>
-      <div class="coach-profile-line" id="coach-profile-line-2">Erholung 78 · Schlaf 82 · Tagesbelastung 61</div>
-    </div>
-
-    <div class="quick-actions coach-only-actions">
-      <button class="quick-btn" onclick="useQuickQuestion('Was soll ich heute trainieren?')">Heute trainieren?</button>
-      <button class="quick-btn" onclick="useQuickQuestion('Wie viel sollte ich pro Woche trainieren?')">Wochenumfang</button>
-      <button class="quick-btn" onclick="useQuickQuestion('Bin ich fit für Intervalle?')">Intervalle?</button>
-      <button class="quick-btn" onclick="useQuickQuestion('Gib mir einen Wochenplan')">Wochenplan</button>
-    </div>
-
-    <div class="ai-card">
-      <div class="ai-message" id="coach-message">
-        Frag einfach: „Was soll ich heute trainieren?“
+      <div class="coach-composer">
+        <input
+          class="ask-input"
+          id="coach-input"
+          placeholder="Frag nach Training, Wochenplan oder Ziel..."
+          onkeydown="if(event.key==='Enter')askCoach()"
+        />
+        <button class="btn-send" onclick="askCoach()">↑</button>
       </div>
     </div>
 
-    <div class="ask-input-wrap">
-      <input
-        class="ask-input"
-        id="coach-input"
-        placeholder="Frag nach Training, Wochenplan oder Ziel..."
-        onkeydown="if(event.key==='Enter')askCoach()"
-      />
-      <button class="btn-send" onclick="askCoach()">↑</button>
-    </div>
-
-    <div id="coach-history"></div>
-  </div>
-
-  <div class="screen" id="screen-calendar">
-    <div class="section-title">Kalender</div>
-    <div class="calendar-card">
-      <div class="calendar-summary">
-        <div class="calendar-summary-title" id="calendar-summary-title">Wochenfokus</div>
-        <div class="calendar-summary-text" id="calendar-summary-text">1 Qualitätstag, 1 längere Einheit, 2 lockere Tage</div>
+    <div class="screen" id="screen-calendar">
+      <div class="section-title">Kalender</div>
+      <div class="calendar-card">
+        <div class="calendar-summary">
+          <div class="calendar-summary-title" id="calendar-summary-title">Wochenfokus</div>
+          <div class="calendar-summary-text" id="calendar-summary-text">1 Qualitätstag, 1 längere Einheit, 2 lockere Tage</div>
+        </div>
+        <div class="calendar-week" id="calendar-week"></div>
       </div>
-      <div class="calendar-week" id="calendar-week"></div>
     </div>
-  </div>
 
-  <div class="screen" id="screen-dashboard">
-    <div class="section-title">Dashboard</div>
+    <div class="screen" id="screen-dashboard">
+      <div class="section-title">Dashboard</div>
 
-    <div class="dashboard-grid" id="dashboard-grid"></div>
-  </div>
+      <div class="range-tabs">
+        <button class="range-tab active" onclick="setDashboardRange('7d', this)">7D</button>
+        <button class="range-tab" onclick="setDashboardRange('1m', this)">1M</button>
+        <button class="range-tab" onclick="setDashboardRange('6m', this)">6M</button>
+        <button class="range-tab" onclick="setDashboardRange('12m', this)">12M</button>
+      </div>
 
-  <div class="screen" id="screen-data">
-    <div class="section-title">Setup</div>
+      <div class="dashboard-chart-card">
+        <div class="dashboard-chart-header">
+          <div>
+            <div class="dashboard-chart-title">Stress und Aktivität</div>
+            <div class="dashboard-chart-sub">über den ausgewählten Zeitraum</div>
+          </div>
+          <div class="legend">
+            <span class="legend-item"><span class="legend-dot stress"></span>Stress</span>
+            <span class="legend-item"><span class="legend-dot activity"></span>Aktivität</span>
+          </div>
+        </div>
+        <svg id="dashboard-combo-chart" class="combo-chart" viewBox="0 0 360 180" preserveAspectRatio="none"></svg>
+      </div>
 
-    <div class="token-section">
-      <h3>Athleten-Profil</h3>
+      <div class="dashboard-grid" id="dashboard-grid"></div>
+    </div>
 
-      <label class="setup-label" for="sport-select">Sportart</label>
-      <select id="sport-select" class="setup-select" onchange="updateProfile()">
-        <option value="Run">Laufen</option>
-        <option value="Ride">Radfahren</option>
-        <option value="Ski">Ski Skating</option>
-        <option value="Mixed">Mixed</option>
-      </select>
+    <div class="screen" id="screen-data">
+      <div class="section-title">Setup</div>
 
-      <label class="setup-label" for="goal-select">Ziel</label>
-      <select id="goal-select" class="setup-select" onchange="updateProfile()">
-        <option value="Marathon">Marathon</option>
-        <option value="Halbmarathon">Halbmarathon</option>
-        <option value="10 km">10 km</option>
-        <option value="5 km">5 km</option>
-        <option value="Ski Marathon Skating">Ski Marathon Skating</option>
-        <option value="Radrennen">Radrennen</option>
-        <option value="Gran Fondo">Gran Fondo</option>
-        <option value="VO2max verbessern">VO2max verbessern</option>
-        <option value="Grundlagenausdauer verbessern">Grundlagenausdauer verbessern</option>
-      </select>
+      <div class="token-section">
+        <h3>Athleten-Profil</h3>
 
-      <label class="setup-label" for="focus-select">Fokus</label>
-      <select id="focus-select" class="setup-select" onchange="updateProfile()">
-        <option value="VO2max verbessern">VO2max verbessern</option>
-        <option value="Grundlagenausdauer verbessern">Grundlagenausdauer verbessern</option>
-        <option value="Schwelle verbessern">Schwelle verbessern</option>
-        <option value="Wettkampf schaffen">Wettkampf schaffen</option>
-        <option value="Wieder in Form kommen">Wieder in Form kommen</option>
-      </select>
+        <label class="setup-label" for="sport-select">Sportart</label>
+        <select id="sport-select" class="setup-select" onchange="updateProfile()">
+          <option value="Run">Laufen</option>
+          <option value="Ride">Radfahren</option>
+          <option value="Ski">Ski Skating</option>
+          <option value="Mixed">Mixed</option>
+        </select>
 
-      <label class="setup-label" for="goal-date-input">Wettkampfdatum</label>
-      <input id="goal-date-input" class="setup-input" type="date" onchange="updateProfile()" />
+        <label class="setup-label" for="goal-select">Ziel</label>
+        <select id="goal-select" class="setup-select" onchange="updateProfile()">
+          <option value="Marathon">Marathon</option>
+          <option value="Halbmarathon">Halbmarathon</option>
+          <option value="10 km">10 km</option>
+          <option value="5 km">5 km</option>
+          <option value="Ski Marathon Skating">Ski Marathon Skating</option>
+          <option value="Radrennen">Radrennen</option>
+          <option value="Gran Fondo">Gran Fondo</option>
+          <option value="VO2max verbessern">VO2max verbessern</option>
+          <option value="Grundlagenausdauer verbessern">Grundlagenausdauer verbessern</option>
+        </select>
 
-      <label class="setup-label" for="days-input">Trainings-Tage pro Woche</label>
-      <input id="days-input" class="setup-input" type="number" value="5" min="2" max="14" onchange="updateProfile()" />
+        <label class="setup-label" for="focus-select">Fokus</label>
+        <select id="focus-select" class="setup-select" onchange="updateProfile()">
+          <option value="VO2max verbessern">VO2max verbessern</option>
+          <option value="Grundlagenausdauer verbessern">Grundlagenausdauer verbessern</option>
+          <option value="Schwelle verbessern">Schwelle verbessern</option>
+          <option value="Wettkampf schaffen">Wettkampf schaffen</option>
+          <option value="Wieder in Form kommen">Wieder in Form kommen</option>
+        </select>
 
-      <p class="setup-text" style="margin-top:12px;">
-        Später können Garmin und Strava diese Daten automatisch befüllen.
-      </p>
+        <label class="setup-label" for="goal-date-input">Wettkampfdatum</label>
+        <input id="goal-date-input" class="setup-input" type="date" onchange="updateProfile()" />
+
+        <label class="setup-label" for="days-input">Trainings-Tage pro Woche</label>
+        <input id="days-input" class="setup-input" type="number" value="5" min="2" max="14" onchange="updateProfile()" />
+
+        <p class="setup-text" style="margin-top:12px;">
+          Garmin liefert offiziell u. a. Schlaf, Stress, Herzfrequenz, Body Battery und Atmung. Eine einzelne offizielle Garmin-„Tagesbelastung 1–100“ gibt es so nicht, daher ist dieser Wert in der App eine eigene Anzeige aus bekannten Daten.  [oai_citation:1‡developer.garmin.com](https://developer.garmin.com/gc-developer-program/health-api/?utm_source=chatgpt.com)
+        </p>
+      </div>
     </div>
   </div>
 

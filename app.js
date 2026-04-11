@@ -697,30 +697,195 @@ function addCoachMessage(role, text) {
   thread.scrollTop = thread.scrollHeight;
 }
 
+function getGoalSpecificHint() {
+  const goal = state.profile.goal;
+
+  if (goal === "Halbmarathon") {
+    return "Für Halbmarathon zählen vor allem Schwelle, Tempogefühl und ein stabiler Long Run.";
+  }
+  if (goal === "Marathon") {
+    return "Für Marathon zählen Umfang, Long Run und gute Verträglichkeit der Wochenstruktur.";
+  }
+  if (goal === "Ski Marathon Skating") {
+    return "Für Ski Marathon Skating sind Ausdauer, Oberkörperkraft und Technik unter Belastung zentral.";
+  }
+  if (goal === "Radrennen" || goal === "Gran Fondo") {
+    return "Für Radrennen zählen stabile Grundlage, längere Belastungen und gute Energiebereitstellung.";
+  }
+  if (goal === "10 km" || goal === "5 km") {
+    return "Für kürzere Laufziele sind VO2max, Tempoökonomie und gute Erholung zwischen harten Tagen wichtig.";
+  }
+  return "Wichtig ist eine gute Balance aus Belastung, Erholung und passendem Fokus.";
+}
+
+function getTodayTrainingSuggestion() {
+  const recovery = state.garmin.recovery;
+  const sleep = state.sleep.score;
+  const strain = calculateDayStrain();
+  const goal = state.profile.goal;
+  const focus = state.profile.focus;
+
+  if (recovery < 45 || sleep < 60) {
+    return {
+      main: "Heute am besten regenerativ",
+      why: "Deine Erholung oder dein Schlaf sind heute zu schwach für einen harten Reiz.",
+      watch: "Kein Druck, lieber locker bewegen oder bewusst pausieren."
+    };
+  }
+
+  if (goal === "Halbmarathon") {
+    if (recovery >= 75 && strain < 65) {
+      return {
+        main: "Heute passt ein kontrollierter Temporeiz",
+        why: "Du bist recht frisch und die Tagesbelastung ist noch gut steuerbar.",
+        watch: "Nicht voll hart, eher sauber an der Schwelle oder knapp darunter."
+      };
+    }
+    return {
+      main: "Heute passt lockere Grundlage besser",
+      why: "Für dein Halbmarathonziel ist heute Konstanz wichtiger als ein erzwungener harter Tag.",
+      watch: "Ruhiger Rhythmus, keine harten Spitzen."
+    };
+  }
+
+  if (goal === "Marathon") {
+    if (recovery >= 72 && strain < 62) {
+      return {
+        main: "Heute passt Marathon-spezifische Qualität",
+        why: "Du bringst genug Frische für einen kontrollierten Reiz mit.",
+        watch: "Nicht zu aggressiv starten, gleichmäßig arbeiten."
+      };
+    }
+    return {
+      main: "Heute lieber stabile Grundlage",
+      why: "Für Marathon bringt dir heute ein ruhiger Umfangstag mehr als ein unnötig harter Reiz.",
+      watch: "Sauber und entspannt bleiben."
+    };
+  }
+
+  if (goal === "Ski Marathon Skating") {
+    return recovery >= 70
+      ? {
+          main: "Heute passt spezifische Ausdauer oder Kraft",
+          why: "Du bist belastbar genug für einen strukturierten Ski-spezifischen Tag.",
+          watch: "Technik nicht verlieren, auch wenn du müde wirst."
+        }
+      : {
+          main: "Heute locker mit Technikfokus",
+          why: "Für Ski Marathon Skating lohnt sich heute eher saubere Bewegung als Härte.",
+          watch: "Locker bleiben und Ökonomie priorisieren."
+        };
+  }
+
+  if (goal === "Radrennen" || goal === "Gran Fondo") {
+    return recovery >= 70
+      ? {
+          main: "Heute passt ein kontrollierter Bike-Reiz",
+          why: "Du bist frisch genug für Sweet Spot oder einen ruhigen Schwellenblock.",
+          watch: "Nicht überziehen, gleichmäßige Leistung halten."
+        }
+      : {
+          main: "Heute lieber Grundlage auf dem Rad",
+          why: "Dein System wirkt nicht ideal für sehr harte Spitzen.",
+          watch: "Ruhige Kadenz oder lockerer Rollen-Tag."
+        };
+  }
+
+  if (focus === "VO2max verbessern") {
+    return recovery >= 75 && strain < 60
+      ? {
+          main: "Heute ist ein guter Tag für kurze harte Intervalle",
+          why: "Deine Frische passt und die Tagesbelastung ist noch kontrollierbar.",
+          watch: "Wenige harte Wiederholungen, Qualität vor Menge."
+        }
+      : {
+          main: "Heute noch kein VO2max-Schwerpunkt",
+          why: "Die Grundlage für einen guten harten Reiz ist heute nicht ideal.",
+          watch: "Locker bleiben und auf den nächsten frischen Tag warten."
+        };
+  }
+
+  return {
+    main: "Heute locker bis moderat",
+    why: "Deine Daten sprechen eher für einen sauberen, kontrollierten Trainingstag.",
+    watch: "Nicht unnötig hart machen."
+  };
+}
+
+function getWeeklyVolumeAnswer() {
+  const goal = state.profile.goal;
+  const days = state.profile.availableDays;
+  const phase = getPhaseByGoal();
+
+  if (goal === "Halbmarathon") {
+    return `Für Halbmarathon passen mit deinen ${days} Trainingstagen pro Woche meist 1 Tempoeinheit, 1 längerer Lauf und der Rest locker. In der Phase ${phase} ist Konstanz wichtiger als zusätzliche Härte.`;
+  }
+
+  if (goal === "Marathon") {
+    return `Für Marathon sind mit ${days} Trainingstagen pro Woche ein Long Run, ein Qualitätsreiz und mehrere ruhige Einheiten sinnvoll. In der Phase ${phase} würde ich eher stabil aufbauen als zu aggressiv steigern.`;
+  }
+
+  if (goal === "Ski Marathon Skating") {
+    return `Für Ski Marathon Skating sind mit ${days} Tagen pro Woche 1 längere Ausdauereinheit, 1 Schwellenreiz und 1 Kraftblock sehr sinnvoll.`;
+  }
+
+  if (goal === "Radrennen" || goal === "Gran Fondo") {
+    return `Für dein Radziel passen mit ${days} Tagen pro Woche meist 1 Qualitätsfahrt, 1 längere Grundlage und mehrere lockere Ergänzungstage.`;
+  }
+
+  return `Mit ${days} Trainingstagen pro Woche würde ich 1 Schwerpunktreiz setzen und die restlichen Tage locker oder moderat halten.`;
+}
+
 function buildCoachAnswer(question) {
   const q = question.toLowerCase();
-  const rec = getTodayRecommendation();
   const weekly = getWeeklyFocus();
+  const hint = getGoalSpecificHint();
+  const suggestion = getTodayTrainingSuggestion();
 
-  if (q.includes("heute")) {
-    return `Heute empfohlen: ${rec.title}. Begründung: Erholung ${state.garmin.recovery}, Schlaf ${state.sleep.score} und Tagesbelastung ${calculateDayStrain()}.`;
+  if (q.includes("was soll ich heute trainieren") || q.includes("heute trainieren")) {
+    return `Heute empfohlen: ${suggestion.main}\n\nWarum: ${suggestion.why}\n\nWorauf achten: ${suggestion.watch}`;
+  }
+
+  if (q.includes("interval")) {
+    if (state.garmin.recovery >= 75 && calculateDayStrain() < 65) {
+      return `Heute gehen Intervalle eher ja.\n\nWarum: Deine Erholung ist gut und die Tagesbelastung noch nicht zu hoch.\n\nWorauf achten: Kurz und sauber, nicht maximal.`;
+    }
+    return `Heute eher keine harten Intervalle.\n\nWarum: Deine aktuelle Frische ist dafür nicht ideal.\n\nWorauf achten: Lieber locker oder moderat trainieren.`;
+  }
+
+  if (q.includes("wie viel") || q.includes("pro woche") || q.includes("wochenumfang")) {
+    return `Wochenumfang:\n\n${getWeeklyVolumeAnswer()}\n\nWorauf achten: ${hint}`;
   }
 
   if (q.includes("wochenplan") || q.includes("woche")) {
-    return `${weekly.title}: ${weekly.text}`;
+    return `Wochenplan:\n\n${weekly.title}: ${weekly.text}\n\nWorauf achten: ${hint}`;
   }
 
-  if (q.includes("intervall")) {
-    return state.garmin.recovery >= 70
-      ? "Heute wäre ein kontrollierter Intervallreiz möglich, aber nicht maximal hart."
-      : "Heute würde ich eher noch keine harten Intervalle setzen.";
+  if (q.includes("marathon")) {
+    return `Marathon-Fokus:\n\nFür Marathon zählen Umfang, Long Run und gute Verträglichkeit der Woche.\n\nWarum: Harte Tage funktionieren nur, wenn die ruhigen Tage wirklich ruhig bleiben.\n\nWorauf achten: Nicht zu viele fordernde Reize aufeinander stapeln.`;
   }
 
-  if (q.includes("wie viel") || q.includes("pro woche")) {
-    return `Für dein Ziel ${state.profile.goal} mit ${state.profile.availableDays} Trainingstagen pro Woche ist Konstanz wichtiger als einzelne harte Tage.`;
+  if (q.includes("halbmarathon")) {
+    return `Halbmarathon-Fokus:\n\nFür Halbmarathon zählen Schwelle, Tempogefühl und ein stabiler Long Run.\n\nWarum: Genau daraus kommt meist der größte Fortschritt.\n\nWorauf achten: Qualität kontrolliert, nicht hektisch.`;
   }
 
-  return `Heute empfohlen: ${rec.title}. Zusätzlich wichtig: Schlaf ${state.sleep.score}, Erholung ${state.garmin.recovery}, Tagesbelastung ${calculateDayStrain()}.`;
+  if (q.includes("vo2") || q.includes("vo2max")) {
+    return `VO2max-Fokus:\n\n1 bis 2 harte Reize pro Woche reichen meistens.\n\nWarum: Mehr ist oft nicht besser, wenn die Erholung nicht mitkommt.\n\nWorauf achten: Nur an frischen Tagen wirklich hart trainieren.`;
+  }
+
+  if (q.includes("rad")) {
+    return `Rad-Fokus:\n\nGrundlage, längere Belastungen und kontrollierte Qualität bringen dich am weitesten.\n\nWarum: Für Radrennen und Gran Fondo zählt Belastungsverträglichkeit.\n\nWorauf achten: Gleichmäßig fahren, nicht zu viele Spitzen.`;
+  }
+
+  if (q.includes("ski")) {
+    return `Ski-Fokus:\n\nLange Ausdauer, Oberkörperkraft und Technik unter Belastung sind zentral.\n\nWarum: Nur Ausdauer allein reicht dafür meist nicht.\n\nWorauf achten: Technik auch unter Müdigkeit sauber halten.`;
+  }
+
+  return `Heute empfohlen: ${suggestion.main}\n\nWarum: ${suggestion.why}\n\nWorauf achten: ${suggestion.watch}`;
+}
+
+function formatCoachText(text) {
+  return text.replace(/\n\n/g, "<br><br>");
 }
 
 function askCoach() {
@@ -731,7 +896,7 @@ function askCoach() {
   input.value = "";
   addCoachMessage("user", question);
   const answer = buildCoachAnswer(question);
-  addCoachMessage("assistant", answer);
+  addCoachMessage("assistant", formatCoachText(answer));
 }
 
 function formatGermanDate() {

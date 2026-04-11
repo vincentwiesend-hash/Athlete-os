@@ -1,5 +1,6 @@
 const state = {
   dashboardRange: "7d",
+  dashboardMetric: "HRV",
   user: {
     name: "Vincent"
   },
@@ -51,21 +52,41 @@ const state = {
     sleep7d: [74, 78, 80, 76, 79, 81, 82],
     stress7d: [42, 39, 48, 51, 44, 36, 34],
     activity7d: [28, 34, 52, 20, 41, 58, 43],
+    hrv7d: [54, 56, 58, 55, 59, 61, 62],
+    rhr7d: [53, 52, 51, 52, 50, 50, 49],
+    vo2max7d: [55, 55, 55, 56, 56, 56, 56],
+    steps7d: [10200, 11040, 9700, 12100, 13200, 14080, 12480],
+    calories7d: [2500, 2620, 2400, 2760, 2880, 2970, 2860],
+    respiration7d: [15.4, 15.1, 15.2, 15.0, 14.9, 14.8, 14.8],
+    avgHr7d: [69, 68, 70, 68, 67, 66, 67],
+    restorativePercent7d: [33, 35, 37, 34, 38, 39, 40],
+    restorativeHours7d: [2.5, 2.7, 2.8, 2.6, 2.9, 3.0, 3.1],
+    sleepHours7d: [7.1, 7.3, 7.5, 7.2, 7.6, 7.7, 7.8],
+    needHours7d: [8.6, 8.6, 8.5, 8.5, 8.4, 8.4, 8.4],
+    debtHours7d: [1.0, 0.9, 0.8, 0.9, 0.7, 0.6, 0.6],
+    efficiency7d: [86, 88, 89, 87, 89, 90, 91],
+    performance7d: [80, 82, 83, 81, 84, 86, 87],
+    consistency7d: [78, 79, 80, 80, 82, 83, 84],
+    timeInBed7d: [8.2, 8.3, 8.3, 8.2, 8.4, 8.5, 8.5],
+    awakeTimeMin7d: [48, 46, 41, 43, 38, 35, 34],
 
-    recovery1m: [58,60,61,63,59,64,66,68,67,69,70,72,68,66,71,73,74,72,75,76,74,77,79,78,76,80,81,79,82,78],
-    sleep1m: [71,72,75,74,73,76,78,77,74,75,79,80,78,76,81,79,77,82,83,81,80,78,82,84,83,81,85,84,83,82],
-    stress1m: [48,52,49,47,53,51,46,44,50,48,45,43,47,49,46,44,42,41,43,45,44,40,39,38,40,42,41,37,36,34],
-    activity1m: [22,28,34,30,18,25,40,42,29,20,38,45,31,24,41,48,37,19,33,46,43,26,18,36,50,44,39,28,35,43],
+    hrv1m: [50,51,50,52,53,54,55,54,53,55,56,55,57,58,57,59,60,58,57,59,60,61,60,59,61,62,61,60,61,62],
+    rhr1m: [55,55,54,54,54,53,53,54,53,52,52,53,52,51,51,52,51,50,50,51,50,49,50,49,49,50,49,49,49,49],
+    vo2max1m: [54,54,54,54,54,54,55,55,55,55,55,55,55,55,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56],
+    steps1m: [9200,9800,10200,11000,8900,9600,10040,10400,11200,11800,9900,10200,10600,10900,11300,11500,11900,12100,12500,12800,11700,11000,10800,11400,12200,13000,13600,14100,13800,12480],
+    calories1m: [2350,2400,2480,2510,2320,2380,2440,2500,2570,2620,2410,2460,2520,2590,2630,2670,2710,2760,2800,2850,2740,2680,2640,2700,2790,2860,2920,2980,2940,2860],
 
-    recovery6m: [52,55,57,59,61,64],
-    sleep6m: [69,71,73,75,78,82],
-    stress6m: [55,52,49,46,40,34],
-    activity6m: [30,33,35,39,41,43],
+    hrv6m: [48,50,53,56,59,62],
+    rhr6m: [56,55,54,52,50,49],
+    vo2max6m: [52,53,54,55,55,56],
+    steps6m: [8800,9300,9700,10800,11700,12480],
+    calories6m: [2280,2360,2440,2580,2720,2860],
 
-    recovery12m: [49,50,52,54,55,57,60,63,66,70,74,78],
-    sleep12m: [66,67,68,69,70,72,73,74,76,78,80,82],
-    stress12m: [58,57,55,53,52,49,48,45,43,40,37,34],
-    activity12m: [24,25,27,29,31,32,34,36,38,40,42,43]
+    hrv12m: [44,45,46,48,49,50,52,54,56,58,60,62],
+    rhr12m: [58,58,57,56,56,55,54,53,52,51,50,49],
+    vo2max12m: [50,50,51,51,52,52,53,54,54,55,55,56],
+    steps12m: [7600,7800,8100,8500,8800,9200,9600,10100,10800,11400,12000,12480],
+    calories12m: [2140,2180,2220,2260,2310,2360,2410,2480,2580,2680,2780,2860]
   },
   strava: {
     activities: [
@@ -125,6 +146,16 @@ function normalize(value, min, max) {
   return Math.round(((clamped - min) / (max - min)) * 100);
 }
 
+function getTargetStrain() {
+  const recovery = state.garmin.recovery;
+  const sleep = state.sleep.score;
+
+  if (recovery >= 80 && sleep >= 80) return 74;
+  if (recovery >= 65 && sleep >= 75) return 62;
+  if (recovery >= 50 && sleep >= 65) return 48;
+  return 32;
+}
+
 function calculateDayStrain() {
   const activityLoad = calculateActivityLoadToday();
   const activityNorm = normalize(activityLoad, 0, 140);
@@ -148,9 +179,9 @@ function getPhaseByGoal() {
 }
 
 function labelForScore(score) {
-  if (score >= 75) return { text: "gut", cls: "pill-good" };
-  if (score >= 50) return { text: "moderat", cls: "pill-mid" };
-  return { text: "niedrig", cls: "pill-low" };
+  if (score >= 75) return "gut";
+  if (score >= 50) return "moderat";
+  return "niedrig";
 }
 
 function valueRating(label, value) {
@@ -377,99 +408,31 @@ function generateWeekPlan() {
   ];
 }
 
-function drawSparkline(svgId, values, color, fillOpacity = 0.18) {
-  const svg = document.getElementById(svgId);
-  if (!svg) return;
-
-  const width = 320;
-  const height = 90;
-  const padding = 8;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1;
-
-  const points = values.map((v, i) => {
-    const x = padding + (i * (width - padding * 2)) / (values.length - 1);
-    const y = height - padding - ((v - min) / range) * (height - padding * 2);
-    return { x, y };
-  });
-
-  const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
-  const areaPath = `${linePath} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`;
-
-  svg.innerHTML = `
-    <defs>
-      <linearGradient id="${svgId}-fill" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="${color}" stop-opacity="${fillOpacity}"></stop>
-        <stop offset="100%" stop-color="${color}" stop-opacity="0"></stop>
-      </linearGradient>
-    </defs>
-    <path d="${areaPath}" fill="url(#${svgId}-fill)"></path>
-    <path d="${linePath}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-    ${points.map(p => `<circle cx="${p.x}" cy="${p.y}" r="2.4" fill="${color}"></circle>`).join("")}
-  `;
+function setRingProgress(circleId, score) {
+  const circle = document.getElementById(circleId);
+  if (!circle) return;
+  const circumference = 364.4;
+  const offset = circumference - (score / 100) * circumference;
+  circle.style.strokeDashoffset = offset;
 }
 
-function drawComboChart() {
-  const svg = document.getElementById("dashboard-combo-chart");
-  if (!svg) return;
-
-  const range = state.dashboardRange;
-  const stress = getHistorySeries("stress", range);
-  const activity = getHistorySeries("activity", range);
-
-  const width = 360;
-  const height = 180;
-  const padding = 16;
-  const maxValue = 100;
-
-  const buildPath = (values) => {
-    return values.map((v, i) => {
-      const x = padding + (i * (width - padding * 2)) / (values.length - 1);
-      const y = height - padding - (v / maxValue) * (height - padding * 2);
-      return `${i === 0 ? "M" : "L"} ${x} ${y}`;
-    }).join(" ");
+function polarPosition(score) {
+  const angle = (-90 + (score / 100) * 360) * (Math.PI / 180);
+  const r = 58;
+  const cx = 80;
+  const cy = 80;
+  return {
+    x: cx + r * Math.cos(angle),
+    y: cy + r * Math.sin(angle)
   };
-
-  const buildPoints = (values) => {
-    return values.map((v, i) => {
-      const x = padding + (i * (width - padding * 2)) / (values.length - 1);
-      const y = height - padding - (v / maxValue) * (height - padding * 2);
-      return { x, y };
-    });
-  };
-
-  const stressPath = buildPath(stress);
-  const activityPath = buildPath(activity);
-  const stressPts = buildPoints(stress);
-  const activityPts = buildPoints(activity);
-
-  const gridLines = [20, 40, 60, 80].map(v => {
-    const y = height - padding - (v / maxValue) * (height - padding * 2);
-    return `<line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" stroke="rgba(255,255,255,0.08)" stroke-width="1"></line>`;
-  }).join("");
-
-  svg.innerHTML = `
-    ${gridLines}
-    <path d="${stressPath}" fill="none" stroke="#ff4d6d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path d="${activityPath}" fill="none" stroke="#57a7ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-    ${stressPts.map(p => `<circle cx="${p.x}" cy="${p.y}" r="2.5" fill="#ff4d6d"></circle>`).join("")}
-    ${activityPts.map(p => `<circle cx="${p.x}" cy="${p.y}" r="2.5" fill="#57a7ff"></circle>`).join("")}
-  `;
 }
 
-function getHistorySeries(type, range) {
-  if (range === "7d") return state.history[`${type}7d`];
-  if (range === "1m") return state.history[`${type}1m`];
-  if (range === "6m") return state.history[`${type}6m`];
-  return state.history[`${type}12m`];
-}
-
-function setDashboardRange(range, btn) {
-  state.dashboardRange = range;
-  document.querySelectorAll(".range-tab").forEach(tab => tab.classList.remove("active"));
-  btn.classList.add("active");
-  renderDashboard();
+function placeMarker(id, score) {
+  const marker = document.getElementById(id);
+  if (!marker) return;
+  const pos = polarPosition(score);
+  marker.setAttribute("cx", pos.x.toFixed(2));
+  marker.setAttribute("cy", pos.y.toFixed(2));
 }
 
 function renderToday() {
@@ -479,26 +442,25 @@ function renderToday() {
   const recoveryScore = state.garmin.recovery;
   const sleepScore = state.sleep.score;
   const strainScore = calculateDayStrain();
-
-  const recoveryBadge = labelForScore(recoveryScore);
-  const sleepBadge = labelForScore(sleepScore);
-  const strainBadge = labelForScore(strainScore);
+  const activityScore = normalize(calculateActivityLoadToday(), 0, 140);
+  const stressScore = Math.round(state.garmin.stress);
+  const targetScore = getTargetStrain();
 
   document.getElementById("recovery-value").textContent = recoveryScore;
   document.getElementById("day-strain-value").textContent = strainScore;
   document.getElementById("sleep-score-value").textContent = sleepScore;
 
-  const recEl = document.getElementById("recovery-badge");
-  recEl.textContent = recoveryBadge.text;
-  recEl.className = `pill ${recoveryBadge.cls}`;
+  document.getElementById("recovery-badge").textContent = labelForScore(recoveryScore);
+  document.getElementById("strain-badge").textContent = labelForScore(strainScore);
+  document.getElementById("sleep-badge").textContent = labelForScore(sleepScore);
 
-  const sleepEl = document.getElementById("sleep-badge");
-  sleepEl.textContent = sleepBadge.text;
-  sleepEl.className = `pill ${sleepBadge.cls}`;
+  setRingProgress("recovery-ring-progress", recoveryScore);
+  setRingProgress("strain-ring-progress", strainScore);
+  setRingProgress("sleep-ring-progress", sleepScore);
 
-  const strainEl = document.getElementById("strain-badge");
-  strainEl.textContent = strainBadge.text;
-  strainEl.className = `pill ${strainBadge.cls}`;
+  placeMarker("strain-marker-activity", activityScore);
+  placeMarker("strain-marker-stress", stressScore);
+  placeMarker("strain-marker-target", targetScore);
 
   document.getElementById("today-title").textContent = recommendation.title;
   document.getElementById("today-text").textContent = recommendation.text;
@@ -515,10 +477,6 @@ function renderToday() {
   document.getElementById("mini-restorative-sleep").textContent = `${state.sleep.restorativeHours.toFixed(1)} h`;
   document.getElementById("mini-rhr").textContent = state.garmin.restingHr;
   document.getElementById("mini-hrv").textContent = `${state.garmin.hrv} ms`;
-
-  drawSparkline("recovery-chart", state.history.recovery7d, "#3dffc0");
-  drawSparkline("strain-chart", state.history.activity7d.map((v, i) => Math.max(1, Math.min(100, Math.round(v * 0.65 + state.history.stress7d[i] * 0.35)))), "#ff8c42");
-  drawSparkline("sleep-chart", state.history.sleep7d, "#6c63ff");
 }
 
 function renderActivities() {
@@ -588,45 +546,129 @@ function dashboardItems() {
   const strain = calculateDayStrain();
 
   return [
-    { label: "HRV", value: `${state.garmin.hrv} ms`, raw: state.garmin.hrv, sub: `Herzfrequenzvariabilität · ${valueRating("HRV", state.garmin.hrv)}` },
-    { label: "Ruhepuls", value: `${state.garmin.restingHr}`, raw: state.garmin.restingHr, sub: `bpm · ${valueRating("Ruhepuls", state.garmin.restingHr)}` },
-    { label: "Schritte", value: `${state.garmin.steps}`, raw: state.garmin.steps, sub: "heute" },
-    { label: "VO2max", value: `${state.garmin.vo2max}`, raw: state.garmin.vo2max, sub: `${valueRating("VO2max", state.garmin.vo2max)} · ml/kg/min` },
-    { label: "Kalorien", value: `${state.garmin.calories}`, raw: state.garmin.calories, sub: "gesamt" },
-    { label: "Atemfrequenz", value: `${state.garmin.respiration}`, raw: state.garmin.respiration, sub: "pro Minute" },
-    { label: "Durchschn. Puls", value: `${state.garmin.avgHr}`, raw: state.garmin.avgHr, sub: "bpm" },
-    { label: "Erholsamer Schlaf", value: `${state.sleep.restorativePercent}%`, raw: state.sleep.restorativePercent, sub: `${state.sleep.restorativeHours} h` },
-    { label: "Geschlafen", value: `${state.sleep.hours} h`, raw: state.sleep.hours, sub: "gesamt" },
-    { label: "Schlafbedarf", value: `${state.sleep.needHours} h`, raw: state.sleep.needHours, sub: "empfohlen" },
-    { label: "Schlafdefizit", value: `${state.sleep.debtHours} h`, raw: state.sleep.debtHours, sub: "offen" },
-    { label: "Schlafeffizienz", value: `${state.sleep.efficiency}%`, raw: state.sleep.efficiency, sub: valueRating("Schlafeffizienz", state.sleep.efficiency) },
-    { label: "Schlafleistung", value: `${state.sleep.performance}%`, raw: state.sleep.performance, sub: valueRating("Schlafleistung", state.sleep.performance) },
-    { label: "Schlafregelmäßigkeit", value: `${state.sleep.consistency}%`, raw: state.sleep.consistency, sub: valueRating("Schlafregelmäßigkeit", state.sleep.consistency) },
-    { label: "Zeit im Bett", value: `${state.sleep.timeInBed} h`, raw: state.sleep.timeInBed, sub: "gesamt" },
-    { label: "Wachzeit", value: `${state.sleep.awakeTimeMin} min`, raw: state.sleep.awakeTimeMin, sub: "nachts wach" },
-    { label: "Deep Sleep", value: `${state.sleep.deepSleepHours} h`, raw: state.sleep.deepSleepHours, sub: "Tiefschlaf" },
-    { label: "REM Sleep", value: `${state.sleep.remSleepHours} h`, raw: state.sleep.remSleepHours, sub: "REM" },
-    { label: "Leichtschlaf", value: `${state.sleep.lightSleepHours} h`, raw: state.sleep.lightSleepHours, sub: "Leichtschlaf" },
-    { label: "Tagesbelastung", value: `${strain}`, raw: strain, sub: valueRating("Tagesbelastung", strain) },
-    { label: "Zone 1", value: `${state.heartRateZones.zone1} min`, raw: state.heartRateZones.zone1, sub: "Herzfrequenzzone" },
-    { label: "Zone 2", value: `${state.heartRateZones.zone2} min`, raw: state.heartRateZones.zone2, sub: "Herzfrequenzzone" },
-    { label: "Zone 3", value: `${state.heartRateZones.zone3} min`, raw: state.heartRateZones.zone3, sub: "Herzfrequenzzone" },
-    { label: "Zone 4", value: `${state.heartRateZones.zone4} min`, raw: state.heartRateZones.zone4, sub: "Herzfrequenzzone" },
-    { label: "Zone 5", value: `${state.heartRateZones.zone5} min`, raw: state.heartRateZones.zone5, sub: "Herzfrequenzzone" }
+    { key: "HRV", label: "HRV", value: `${state.garmin.hrv} ms`, sub: `Herzfrequenzvariabilität · ${valueRating("HRV", state.garmin.hrv)}` },
+    { key: "Ruhepuls", label: "Ruhepuls", value: `${state.garmin.restingHr}`, sub: `bpm · ${valueRating("Ruhepuls", state.garmin.restingHr)}` },
+    { key: "Schritte", label: "Schritte", value: `${state.garmin.steps}`, sub: "heute" },
+    { key: "VO2max", label: "VO2max", value: `${state.garmin.vo2max}`, sub: `${valueRating("VO2max", state.garmin.vo2max)} · ml/kg/min` },
+    { key: "Kalorien", label: "Kalorien", value: `${state.garmin.calories}`, sub: "gesamt" },
+    { key: "Atemfrequenz", label: "Atemfrequenz", value: `${state.garmin.respiration}`, sub: "pro Minute" },
+    { key: "Durchschnittspuls", label: "Durchschn. Puls", value: `${state.garmin.avgHr}`, sub: "bpm" },
+    { key: "Erholsamer Schlaf %", label: "Erholsamer Schlaf", value: `${state.sleep.restorativePercent}%`, sub: `${state.sleep.restorativeHours} h` },
+    { key: "Geschlafene Stunden", label: "Geschlafen", value: `${state.sleep.hours} h`, sub: "gesamt" },
+    { key: "Schlafbedarf", label: "Schlafbedarf", value: `${state.sleep.needHours} h`, sub: "empfohlen" },
+    { key: "Schlafdefizit", label: "Schlafdefizit", value: `${state.sleep.debtHours} h`, sub: "offen" },
+    { key: "Schlafeffizienz", label: "Schlafeffizienz", value: `${state.sleep.efficiency}%`, sub: valueRating("Schlafeffizienz", state.sleep.efficiency) },
+    { key: "Schlafleistung", label: "Schlafleistung", value: `${state.sleep.performance}%`, sub: valueRating("Schlafleistung", state.sleep.performance) },
+    { key: "Schlafregelmäßigkeit", label: "Schlafregelmäßigkeit", value: `${state.sleep.consistency}%`, sub: valueRating("Schlafregelmäßigkeit", state.sleep.consistency) },
+    { key: "Zeit im Bett", label: "Zeit im Bett", value: `${state.sleep.timeInBed} h`, sub: "gesamt" },
+    { key: "Wachzeit", label: "Wachzeit", value: `${state.sleep.awakeTimeMin} min`, sub: "nachts wach" },
+    { key: "Deep Sleep", label: "Deep Sleep", value: `${state.sleep.deepSleepHours} h`, sub: "Tiefschlaf" },
+    { key: "REM Sleep", label: "REM Sleep", value: `${state.sleep.remSleepHours} h`, sub: "REM" },
+    { key: "Leichtschlaf", label: "Leichtschlaf", value: `${state.sleep.lightSleepHours} h`, sub: "Leichtschlaf" },
+    { key: "Tagesbelastung", label: "Tagesbelastung", value: `${strain}`, sub: valueRating("Tagesbelastung", strain) },
+    { key: "Zone 1", label: "Zone 1", value: `${state.heartRateZones.zone1} min`, sub: "Herzfrequenzzone" },
+    { key: "Zone 2", label: "Zone 2", value: `${state.heartRateZones.zone2} min`, sub: "Herzfrequenzzone" },
+    { key: "Zone 3", label: "Zone 3", value: `${state.heartRateZones.zone3} min`, sub: "Herzfrequenzzone" },
+    { key: "Zone 4", label: "Zone 4", value: `${state.heartRateZones.zone4} min`, sub: "Herzfrequenzzone" },
+    { key: "Zone 5", label: "Zone 5", value: `${state.heartRateZones.zone5} min`, sub: "Herzfrequenzzone" }
   ];
 }
 
+function metricSeries(metric, range) {
+  const suffix = range === "7d" ? "7d" : range === "1m" ? "1m" : range === "6m" ? "6m" : "12m";
+
+  const map = {
+    "HRV": state.history[`hrv${suffix}`],
+    "Ruhepuls": state.history[`rhr${suffix}`],
+    "VO2max": state.history[`vo2max${suffix}`],
+    "Schritte": state.history[`steps${suffix}`],
+    "Kalorien": state.history[`calories${suffix}`],
+    "Atemfrequenz": state.history[`respiration${suffix}`],
+    "Durchschnittspuls": state.history[`avgHr${suffix}`],
+    "Erholsamer Schlaf %": state.history[`restorativePercent${suffix}`],
+    "Geschlafene Stunden": state.history[`sleepHours${suffix}`],
+    "Schlafbedarf": state.history[`needHours${suffix}`],
+    "Schlafdefizit": state.history[`debtHours${suffix}`],
+    "Schlafeffizienz": state.history[`efficiency${suffix}`],
+    "Schlafleistung": state.history[`performance${suffix}`],
+    "Schlafregelmäßigkeit": state.history[`consistency${suffix}`],
+    "Zeit im Bett": state.history[`timeInBed${suffix}`],
+    "Wachzeit": state.history[`awakeTimeMin${suffix}`],
+    "Tagesbelastung": state.history[`activity${suffix}`].map((v, i) => Math.max(1, Math.min(100, Math.round(v * 0.65 + state.history[`stress${suffix}`][i] * 0.35))))
+  };
+
+  return map[metric] || [10, 20, 30, 25, 35, 40, 38];
+}
+
+function drawDetailChart(values) {
+  const svg = document.getElementById("dashboard-detail-chart");
+  const width = 360;
+  const height = 180;
+  const padding = 16;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+
+  const points = values.map((v, i) => {
+    const x = padding + (i * (width - padding * 2)) / (values.length - 1);
+    const y = height - padding - ((v - min) / range) * (height - padding * 2);
+    return { x, y };
+  });
+
+  const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+  const areaPath = `${linePath} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`;
+
+  const gridLines = [0.25, 0.5, 0.75].map(f => {
+    const y = padding + (height - padding * 2) * f;
+    return `<line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" stroke="rgba(255,255,255,0.08)" stroke-width="1"></line>`;
+  }).join("");
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="detail-fill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#6c63ff" stop-opacity="0.28"></stop>
+        <stop offset="100%" stop-color="#6c63ff" stop-opacity="0"></stop>
+      </linearGradient>
+    </defs>
+    ${gridLines}
+    <path d="${areaPath}" fill="url(#detail-fill)"></path>
+    <path d="${linePath}" fill="none" stroke="#6c63ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+    ${points.map(p => `<circle cx="${p.x}" cy="${p.y}" r="2.5" fill="#6c63ff"></circle>`).join("")}
+  `;
+}
+
+function openDashboardDetail(metric) {
+  state.dashboardMetric = metric;
+  document.getElementById("dashboard-detail-card").classList.remove("hidden");
+  document.getElementById("dashboard-detail-title").textContent = metric;
+  document.getElementById("dashboard-detail-sub").textContent = `Trend über ${state.dashboardRange.toUpperCase()}`;
+  drawDetailChart(metricSeries(metric, state.dashboardRange));
+}
+
+function closeDashboardDetail() {
+  document.getElementById("dashboard-detail-card").classList.add("hidden");
+}
+
+function setDashboardRange(range, btn) {
+  state.dashboardRange = range;
+  document.querySelectorAll(".range-tab").forEach(tab => tab.classList.remove("active"));
+  btn.classList.add("active");
+  openDashboardDetail(state.dashboardMetric);
+}
+
 function renderDashboard() {
-  const grid = document.getElementById("dashboard-grid");
-  grid.innerHTML = dashboardItems().map(item => `
-    <div class="dashboard-card">
-      <div class="dashboard-label">${item.label}</div>
-      <div class="dashboard-value">${item.value}</div>
-      <div class="dashboard-sub">${item.sub}</div>
+  const list = document.getElementById("dashboard-list");
+  list.innerHTML = dashboardItems().map(item => `
+    <div class="dashboard-row" onclick="openDashboardDetail('${item.key.replace(/'/g, "\\'")}')">
+      <div>
+        <div class="dashboard-row-label">${item.label}</div>
+        <div class="dashboard-row-sub">${item.sub}</div>
+      </div>
+      <div class="dashboard-row-right">
+        <div class="dashboard-row-value">${item.value}</div>
+      </div>
     </div>
   `).join("");
-
-  drawComboChart();
 }
 
 function useQuickQuestion(question) {
@@ -653,7 +695,6 @@ function addCoachMessage(role, text) {
   `;
   thread.appendChild(wrap);
   thread.scrollTop = thread.scrollHeight;
-  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
 }
 
 function buildCoachAnswer(question) {

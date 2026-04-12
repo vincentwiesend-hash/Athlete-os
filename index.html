@@ -13,7 +13,6 @@
 </head>
 <body>
   <div class="app-shell">
-    <!-- Header -->
     <header class="app-header">
       <div class="header-content">
         <div>
@@ -27,16 +26,13 @@
       </div>
     </header>
 
-    <!-- Main Content -->
     <main class="content-wrapper">
-      <!-- Today Screen -->
       <section class="screen active" id="screen-today">
         <div class="screen-header">
           <h2>Heute</h2>
-          <p class="screen-description">Dein Trainingsplan basierend auf deinem aktuellen Status</p>
+          <p class="screen-description">Dein Status für den heutigen Tag</p>
         </div>
 
-        <!-- Score Rings -->
         <div class="metrics-grid">
           <div class="metric-card">
             <h3 class="metric-label">Erholung</h3>
@@ -45,8 +41,10 @@
                 <circle cx="60" cy="60" r="54" class="ring-bg"></circle>
                 <circle cx="60" cy="60" r="54" class="ring-progress recovery" id="recovery-ring"></circle>
               </svg>
-              <div class="metric-value" id="recovery-value">78</div>
-              <div class="metric-status" id="recovery-status">Gut</div>
+              <div class="metric-center">
+                <div class="metric-value" id="recovery-value">78</div>
+                <div class="metric-status" id="recovery-status">Gut</div>
+              </div>
             </div>
           </div>
 
@@ -56,9 +54,21 @@
               <svg class="metric-ring" viewBox="0 0 120 120">
                 <circle cx="60" cy="60" r="54" class="ring-bg"></circle>
                 <circle cx="60" cy="60" r="54" class="ring-progress strain" id="strain-ring"></circle>
+
+                <circle id="strain-marker-activity" cx="60" cy="6" r="3.5" class="marker activity"></circle>
+                <circle id="strain-marker-stress" cx="60" cy="6" r="3.5" class="marker stress"></circle>
+                <circle id="strain-marker-target" cx="60" cy="6" r="3.5" class="marker target"></circle>
               </svg>
-              <div class="metric-value" id="strain-value">61</div>
-              <div class="metric-status" id="strain-status">Moderat</div>
+              <div class="metric-center">
+                <div class="metric-value" id="strain-value">61</div>
+                <div class="metric-status" id="strain-status">Moderat</div>
+              </div>
+            </div>
+
+            <div class="strain-legend">
+              <span><span class="legend-dot activity"></span>Aktivität</span>
+              <span><span class="legend-dot stress"></span>Stress</span>
+              <span><span class="legend-dot target"></span>Ziel</span>
             </div>
           </div>
 
@@ -69,13 +79,14 @@
                 <circle cx="60" cy="60" r="54" class="ring-bg"></circle>
                 <circle cx="60" cy="60" r="54" class="ring-progress sleep" id="sleep-ring"></circle>
               </svg>
-              <div class="metric-value" id="sleep-value">82</div>
-              <div class="metric-status" id="sleep-status">Gut</div>
+              <div class="metric-center">
+                <div class="metric-value" id="sleep-value">82</div>
+                <div class="metric-status" id="sleep-status">Gut</div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Recommendation Card -->
         <div class="recommendation-card">
           <div class="card-header">
             <h3>💡 Heute empfohlen</h3>
@@ -86,7 +97,30 @@
           </div>
         </div>
 
-        <!-- Quick Stats -->
+        <div class="recommendation-card">
+          <div class="card-header">
+            <h3>🎯 Geplante Einheit heute</h3>
+          </div>
+          <div class="card-body">
+            <h4 id="planned-title">45–60 min locker</h4>
+            <p id="planned-text">Am besten ruhig, gleichmäßig und ohne harte Spitzen.</p>
+          </div>
+        </div>
+
+        <div class="options-grid">
+          <div class="option-card option-primary">
+            <div class="option-kicker">Option A</div>
+            <div class="option-title" id="option-a-title">Lockerer Dauerlauf</div>
+            <div class="option-text" id="option-a-text">45–60 min locker in ruhigem Bereich.</div>
+          </div>
+
+          <div class="option-card">
+            <div class="option-kicker">Option B</div>
+            <div class="option-title" id="option-b-title">Recovery</div>
+            <div class="option-text" id="option-b-text">30–40 min sehr locker oder Mobility.</div>
+          </div>
+        </div>
+
         <div class="quick-stats">
           <div class="stat-item">
             <span class="stat-label">Geschlafen</span>
@@ -107,7 +141,6 @@
         </div>
       </section>
 
-      <!-- Activities Screen -->
       <section class="screen" id="screen-activities">
         <div class="screen-header">
           <h2>Deine Trainings-Sessions</h2>
@@ -116,20 +149,37 @@
         <div id="activities-container" class="activities-list"></div>
       </section>
 
-      <!-- Coach Screen -->
-      <section class="screen" id="screen-coach">
+      <section class="screen coach-screen" id="screen-coach">
         <div class="screen-header">
           <h2>Dein Coach</h2>
           <p class="screen-description">KI-gestützte Trainingsberatung</p>
         </div>
-        <div id="coach-messages" class="coach-messages"></div>
-        <div class="coach-input-area">
-          <input type="text" id="coach-input" class="coach-input" placeholder="Stell deine Trainings-Frage...">
-          <button class="coach-btn-send">→</button>
+
+        <div class="coach-profile-card">
+          <div class="coach-profile-line" id="coach-profile-line-1">Laufen · Halbmarathon · 5 Tage/Woche</div>
+          <div class="coach-profile-line" id="coach-profile-line-2">Erholung 78 · Schlaf 82 · Tagesbelastung 61</div>
+        </div>
+
+        <div class="coach-quick-actions">
+          <button class="quick-action-btn" onclick="useQuickQuestion('Was soll ich heute trainieren?')">Heute trainieren?</button>
+          <button class="quick-action-btn" onclick="useQuickQuestion('Bin ich fit für Intervalle?')">Intervalle?</button>
+          <button class="quick-action-btn" onclick="useQuickQuestion('Wie viel sollte ich pro Woche trainieren?')">Wochenumfang</button>
+          <button class="quick-action-btn" onclick="useQuickQuestion('Gib mir einen Wochenplan')">Wochenplan</button>
+        </div>
+
+        <div id="coach-messages" class="coach-messages">
+          <div class="coach-message assistant">
+            <div class="coach-message-role">Coach</div>
+            <div class="coach-message-bubble">Frag einfach: „Was soll ich heute trainieren?“</div>
+          </div>
+        </div>
+
+        <div class="coach-input-bar">
+          <input type="text" id="coach-input" class="coach-input" placeholder="Stell deine Trainings-Frage..." onkeydown="if(event.key==='Enter')askCoach()">
+          <button class="coach-btn-send" onclick="askCoach()">→</button>
         </div>
       </section>
 
-      <!-- Calendar Screen -->
       <section class="screen" id="screen-calendar">
         <div class="screen-header">
           <h2>Wochenplaner</h2>
@@ -138,7 +188,6 @@
         <div id="calendar-container" class="calendar-container"></div>
       </section>
 
-      <!-- Dashboard Screen -->
       <section class="screen" id="screen-dashboard">
         <div class="screen-header">
           <h2>Statistiken & Analytics</h2>
@@ -147,7 +196,6 @@
         <div id="dashboard-container" class="dashboard-container"></div>
       </section>
 
-      <!-- Setup Screen -->
       <section class="screen" id="screen-setup">
         <div class="screen-header">
           <h2>Profileinstellungen</h2>
@@ -189,7 +237,6 @@
       </section>
     </main>
 
-    <!-- Bottom Navigation -->
     <nav class="bottom-nav">
       <button class="nav-item active" data-screen="today">
         <span class="nav-icon">📊</span>

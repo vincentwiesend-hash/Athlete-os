@@ -6,244 +6,217 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Athlete OS" />
-  <title>Athlete OS</title>
+  <title>Athlete OS - Trainingsplaner für Athleten</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="app-shell">
-    <div class="header">
-      <div>
-        <div class="header-greeting">Athlete OS</div>
-        <div class="header-date" id="current-date"></div>
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <div>
+          <h1 class="header-title">Athlete OS</h1>
+          <p class="header-subtitle" id="current-date">Montag, 14. April 2026</p>
+        </div>
+        <div id="connection-status" class="status-badge status-active">
+          <span class="status-dot"></span>
+          <span>Verbunden</span>
+        </div>
       </div>
-      <div id="connection-status" class="status-pill status-ok">
-        <div class="dot"></div>
-        Demo Modus
-      </div>
-    </div>
+    </header>
 
-    <div class="screen active" id="screen-today">
-      <div class="section-title">Heute</div>
+    <!-- Main Content -->
+    <main class="content-wrapper">
+      <!-- Today Screen -->
+      <section class="screen active" id="screen-today">
+        <div class="screen-header">
+          <h2>Heute</h2>
+          <p class="screen-description">Dein Trainingsplan basierend auf deinem aktuellen Status</p>
+        </div>
 
-      <div class="rings-row">
-        <div class="ring-card">
-          <div class="ring-title">Erholung</div>
-          <div class="score-ring" id="recovery-ring-card">
-            <svg viewBox="0 0 160 160" class="ring-svg">
-              <circle cx="80" cy="80" r="58" class="ring-track"></circle>
-              <circle id="recovery-ring-progress" cx="80" cy="80" r="58" class="ring-progress ring-recovery"></circle>
-            </svg>
-            <div class="ring-center">
-              <div class="ring-score" id="recovery-value">78</div>
-              <div class="ring-meta" id="recovery-badge">gut</div>
+        <!-- Score Rings -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <h3 class="metric-label">Erholung</h3>
+            <div class="metric-ring-container">
+              <svg class="metric-ring" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="54" class="ring-bg"></circle>
+                <circle cx="60" cy="60" r="54" class="ring-progress recovery" id="recovery-ring"></circle>
+              </svg>
+              <div class="metric-value" id="recovery-value">78</div>
+              <div class="metric-status" id="recovery-status">Gut</div>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <h3 class="metric-label">Tagesbelastung</h3>
+            <div class="metric-ring-container">
+              <svg class="metric-ring" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="54" class="ring-bg"></circle>
+                <circle cx="60" cy="60" r="54" class="ring-progress strain" id="strain-ring"></circle>
+              </svg>
+              <div class="metric-value" id="strain-value">61</div>
+              <div class="metric-status" id="strain-status">Moderat</div>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <h3 class="metric-label">Schlaf</h3>
+            <div class="metric-ring-container">
+              <svg class="metric-ring" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="54" class="ring-bg"></circle>
+                <circle cx="60" cy="60" r="54" class="ring-progress sleep" id="sleep-ring"></circle>
+              </svg>
+              <div class="metric-value" id="sleep-value">82</div>
+              <div class="metric-status" id="sleep-status">Gut</div>
             </div>
           </div>
         </div>
 
-        <div class="ring-card">
-          <div class="ring-title">Tagesbelastung</div>
-          <div class="score-ring" id="strain-ring-card">
-            <svg viewBox="0 0 160 160" class="ring-svg">
-              <circle cx="80" cy="80" r="58" class="ring-track"></circle>
-              <circle id="strain-ring-progress" cx="80" cy="80" r="58" class="ring-progress ring-strain"></circle>
-
-              <circle id="strain-marker-activity" cx="80" cy="22" r="4" class="ring-marker marker-activity"></circle>
-              <circle id="strain-marker-stress" cx="80" cy="22" r="4" class="ring-marker marker-stress"></circle>
-              <circle id="strain-marker-target" cx="80" cy="22" r="4" class="ring-marker marker-target"></circle>
-            </svg>
-            <div class="ring-center">
-              <div class="ring-score" id="day-strain-value">61</div>
-              <div class="ring-meta" id="strain-badge">moderat</div>
-            </div>
+        <!-- Recommendation Card -->
+        <div class="recommendation-card">
+          <div class="card-header">
+            <h3>💡 Heute empfohlen</h3>
           </div>
-          <div class="strain-legend">
-            <span><span class="legend-dot activity"></span>Aktivität</span>
-            <span><span class="legend-dot stress"></span>Stress</span>
-            <span><span class="legend-dot target"></span>Ziel</span>
+          <div class="card-body">
+            <h4 id="recommendation-title">Lockere Ausdauer</h4>
+            <p id="recommendation-text">Deine Erholung ist gut. Ein lockerer bis moderater Trainingstag passt perfekt.</p>
           </div>
         </div>
 
-        <div class="ring-card">
-          <div class="ring-title">Schlaf</div>
-          <div class="score-ring" id="sleep-ring-card">
-            <svg viewBox="0 0 160 160" class="ring-svg">
-              <circle cx="80" cy="80" r="58" class="ring-track"></circle>
-              <circle id="sleep-ring-progress" cx="80" cy="80" r="58" class="ring-progress ring-sleep"></circle>
-            </svg>
-            <div class="ring-center">
-              <div class="ring-score" id="sleep-score-value">82</div>
-              <div class="ring-meta" id="sleep-badge">gut</div>
-            </div>
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+          <div class="stat-item">
+            <span class="stat-label">Geschlafen</span>
+            <span class="stat-value" id="stat-sleep">7.8h</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Ruhepuls</span>
+            <span class="stat-value" id="stat-rhr">49</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">HRV</span>
+            <span class="stat-value" id="stat-hrv">62ms</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Schritte</span>
+            <span class="stat-value" id="stat-steps">12.4k</span>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="coach-summary-card">
-        <div class="coach-summary-label">Heute empfohlen</div>
-        <div class="coach-summary-title" id="today-title">Lockere Ausdauer</div>
-        <div class="coach-summary-text" id="today-text">
-          Deine Erholung ist gut, aber die Tagesbelastung ist nicht ganz niedrig. Heute passt eher kontrolliertes Training.
+      <!-- Activities Screen -->
+      <section class="screen" id="screen-activities">
+        <div class="screen-header">
+          <h2>Deine Trainings-Sessions</h2>
+          <p class="screen-description">Aktuelle und letzte Trainingseinheiten</p>
         </div>
-      </div>
+        <div id="activities-container" class="activities-list"></div>
+      </section>
 
-      <div class="plan-card">
-        <div class="plan-label">Geplante Einheit heute</div>
-        <div class="plan-main" id="planned-session-title">45–60 min locker</div>
-        <div class="plan-sub" id="planned-session-text">Am besten ruhig, gleichmäßig und ohne harte Spitzen.</div>
-      </div>
-
-      <div class="option-grid">
-        <div class="option-card option-primary">
-          <div class="option-label">Option A</div>
-          <div class="option-title" id="option-a-title">Lockerer Dauerlauf</div>
-          <div class="option-text" id="option-a-text">45–60 min locker in ruhigem Bereich.</div>
+      <!-- Coach Screen -->
+      <section class="screen" id="screen-coach">
+        <div class="screen-header">
+          <h2>Dein Coach</h2>
+          <p class="screen-description">KI-gestützte Trainingsberatung</p>
         </div>
-
-        <div class="option-card">
-          <div class="option-label">Option B</div>
-          <div class="option-title" id="option-b-title">Recovery</div>
-          <div class="option-text" id="option-b-text">30–40 min sehr locker oder Mobility.</div>
+        <div id="coach-messages" class="coach-messages"></div>
+        <div class="coach-input-area">
+          <input type="text" id="coach-input" class="coach-input" placeholder="Stell deine Trainings-Frage...">
+          <button class="coach-btn-send">→</button>
         </div>
-      </div>
+      </section>
 
-      <div class="mini-grid">
-        <div class="mini-card">
-          <div class="mini-label">Geschlafen</div>
-          <div class="mini-value" id="mini-sleep-hours">7.8 h</div>
+      <!-- Calendar Screen -->
+      <section class="screen" id="screen-calendar">
+        <div class="screen-header">
+          <h2>Wochenplaner</h2>
+          <p class="screen-description">Dein Trainingsplan für diese Woche</p>
         </div>
-        <div class="mini-card">
-          <div class="mini-label">Erholsamer Schlaf</div>
-          <div class="mini-value" id="mini-restorative-sleep">3.1 h</div>
+        <div id="calendar-container" class="calendar-container"></div>
+      </section>
+
+      <!-- Dashboard Screen -->
+      <section class="screen" id="screen-dashboard">
+        <div class="screen-header">
+          <h2>Statistiken & Analytics</h2>
+          <p class="screen-description">Detaillierte Übersicht deiner Kennzahlen</p>
         </div>
-        <div class="mini-card">
-          <div class="mini-label">Ruhepuls</div>
-          <div class="mini-value" id="mini-rhr">49</div>
+        <div id="dashboard-container" class="dashboard-container"></div>
+      </section>
+
+      <!-- Setup Screen -->
+      <section class="screen" id="screen-setup">
+        <div class="screen-header">
+          <h2>Profileinstellungen</h2>
+          <p class="screen-description">Passe dein Athletenprofil an</p>
         </div>
-        <div class="mini-card">
-          <div class="mini-label">HRV</div>
-          <div class="mini-value" id="mini-hrv">62 ms</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="screen" id="screen-activities">
-      <div class="section-title">Training</div>
-      <div id="activities-list"></div>
-    </div>
-
-    <div class="screen coach-screen" id="screen-coach">
-      <div class="section-title">Coach</div>
-
-      <div class="coach-profile-card">
-        <div class="coach-profile-title">Athleten-Profil</div>
-        <div class="coach-profile-line" id="coach-profile-line-1">Laufen · Halbmarathon · VO2max verbessern</div>
-        <div class="coach-profile-line" id="coach-profile-line-2">Erholung 78 · Schlaf 82 · Tagesbelastung 61</div>
-      </div>
-
-      <div class="quick-actions coach-only-actions">
-        <button class="quick-btn" onclick="useQuickQuestion('Was soll ich heute trainieren?')">Heute trainieren?</button>
-        <button class="quick-btn" onclick="useQuickQuestion('Wie viel sollte ich pro Woche trainieren?')">Wochenumfang</button>
-        <button class="quick-btn" onclick="useQuickQuestion('Bin ich fit für Intervalle?')">Intervalle?</button>
-        <button class="quick-btn" onclick="useQuickQuestion('Gib mir einen Wochenplan')">Wochenplan</button>
-      </div>
-
-      <div class="coach-thread" id="coach-thread">
-        <div class="message message-assistant">
-          <div class="message-role">Coach</div>
-          <div class="message-bubble">
-            Frag einfach: „Was soll ich heute trainieren?“
+        <form id="profile-form" class="setup-form">
+          <div class="form-group">
+            <label for="sport-select">Sportart</label>
+            <select id="sport-select" onchange="updateProfile()">
+              <option value="Run">Laufen</option>
+              <option value="Ride">Radfahren</option>
+              <option value="Ski">Ski Skating</option>
+              <option value="Mixed">Mixed Sports</option>
+            </select>
           </div>
-        </div>
-      </div>
 
-      <div class="coach-composer">
-        <div class="composer-inner">
-          <input
-            class="ask-input"
-            id="coach-input"
-            placeholder="Frag nach Training, Wochenplan oder Ziel..."
-            onkeydown="if(event.key==='Enter')askCoach()"
-          />
-          <button class="btn-send" onclick="askCoach()">↑</button>
-        </div>
-      </div>
-    </div>
+          <div class="form-group">
+            <label for="goal-select">Ziel</label>
+            <select id="goal-select" onchange="updateProfile()">
+              <option value="Halbmarathon">Halbmarathon</option>
+              <option value="Marathon">Marathon</option>
+              <option value="10 km">10 km</option>
+              <option value="5 km">5 km</option>
+              <option value="Radrennen">Radrennen</option>
+              <option value="Gran Fondo">Gran Fondo</option>
+            </select>
+          </div>
 
-    <div class="screen" id="screen-calendar">
-      <div class="section-title">Kalender</div>
-      <div class="calendar-card">
-        <div class="calendar-summary">
-          <div class="calendar-summary-title" id="calendar-summary-title">Wochenfokus</div>
-          <div class="calendar-summary-text" id="calendar-summary-text">1 Qualitätstag, 1 längere Einheit, 2 lockere Tage</div>
-        </div>
-        <div class="calendar-week" id="calendar-week"></div>
-      </div>
-    </div>
+          <div class="form-group">
+            <label for="days-input">Trainingstage pro Woche</label>
+            <input id="days-input" type="number" min="2" max="7" value="5" onchange="updateProfile()">
+          </div>
 
-    <div class="screen" id="screen-dashboard">
-      <div class="section-title">Dashboard</div>
-      <div class="dashboard-list" id="dashboard-list"></div>
-    </div>
+          <div class="form-group">
+            <label for="goal-date">Wettkampfdatum</label>
+            <input id="goal-date" type="date" onchange="updateProfile()">
+          </div>
+        </form>
+      </section>
+    </main>
 
-    <div class="screen" id="screen-data">
-      <div class="section-title">Setup</div>
-
-      <div class="token-section">
-        <h3>Athleten-Profil</h3>
-
-        <label class="setup-label" for="sport-select">Sportart</label>
-        <select id="sport-select" class="setup-select" onchange="updateProfile()">
-          <option value="Run">Laufen</option>
-          <option value="Ride">Radfahren</option>
-          <option value="Ski">Ski Skating</option>
-          <option value="Mixed">Mixed</option>
-        </select>
-
-        <label class="setup-label" for="goal-select">Ziel</label>
-        <select id="goal-select" class="setup-select" onchange="updateProfile()">
-          <option value="Marathon">Marathon</option>
-          <option value="Halbmarathon">Halbmarathon</option>
-          <option value="10 km">10 km</option>
-          <option value="5 km">5 km</option>
-          <option value="Ski Marathon Skating">Ski Marathon Skating</option>
-          <option value="Radrennen">Radrennen</option>
-          <option value="Gran Fondo">Gran Fondo</option>
-          <option value="VO2max verbessern">VO2max verbessern</option>
-          <option value="Grundlagenausdauer verbessern">Grundlagenausdauer verbessern</option>
-        </select>
-
-        <label class="setup-label" for="focus-select">Fokus</label>
-        <select id="focus-select" class="setup-select" onchange="updateProfile()">
-          <option value="VO2max verbessern">VO2max verbessern</option>
-          <option value="Grundlagenausdauer verbessern">Grundlagenausdauer verbessern</option>
-          <option value="Schwelle verbessern">Schwelle verbessern</option>
-          <option value="Wettkampf schaffen">Wettkampf schaffen</option>
-          <option value="Wieder in Form kommen">Wieder in Form kommen</option>
-        </select>
-
-        <label class="setup-label" for="goal-date-input">Wettkampfdatum</label>
-        <input id="goal-date-input" class="setup-input" type="date" onchange="updateProfile()" />
-
-        <label class="setup-label" for="days-input">Trainings-Tage pro Woche</label>
-        <input id="days-input" class="setup-input" type="number" value="5" min="2" max="14" onchange="updateProfile()" />
-
-        <p class="setup-text" style="margin-top:12px;">
-          Später können Garmin und Strava diese Daten automatisch befüllen.
-        </p>
-      </div>
-    </div>
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-screen="today">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Heute</span>
+      </button>
+      <button class="nav-item" data-screen="activities">
+        <span class="nav-icon">⚡</span>
+        <span class="nav-label">Training</span>
+      </button>
+      <button class="nav-item" data-screen="coach">
+        <span class="nav-icon">🤖</span>
+        <span class="nav-label">Coach</span>
+      </button>
+      <button class="nav-item" data-screen="calendar">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">Woche</span>
+      </button>
+      <button class="nav-item" data-screen="dashboard">
+        <span class="nav-icon">📈</span>
+        <span class="nav-label">Stats</span>
+      </button>
+      <button class="nav-item" data-screen="setup">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">Setup</span>
+      </button>
+    </nav>
   </div>
-
-  <nav class="nav">
-    <button class="nav-btn active" onclick="showScreen('today', this)"><span class="nav-icon">◎</span>Heute</button>
-    <button class="nav-btn" onclick="showScreen('activities', this)"><span class="nav-icon">⚡</span>Training</button>
-    <button class="nav-btn" onclick="showScreen('coach', this)"><span class="nav-icon">✦</span>Coach</button>
-    <button class="nav-btn" onclick="showScreen('calendar', this)"><span class="nav-icon">◷</span>Kalender</button>
-    <button class="nav-btn" onclick="showScreen('dashboard', this)"><span class="nav-icon">▣</span>Dashboard</button>
-    <button class="nav-btn" onclick="showScreen('data', this)"><span class="nav-icon">◈</span>Setup</button>
-  </nav>
 
   <script src="app.js"></script>
 </body>

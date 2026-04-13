@@ -154,37 +154,6 @@ body {
   color: var(--text-secondary);
 }
 
-.action-bar {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
-}
-
-.primary-action-btn,
-.secondary-action-btn {
-  padding: var(--spacing-lg);
-  border-radius: var(--radius-lg);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-}
-
-.primary-action-btn {
-  background: linear-gradient(135deg, rgba(108, 99, 255, 0.20), rgba(138, 131, 255, 0.10));
-  border-color: rgba(108, 99, 255, 0.35);
-}
-
-.secondary-action-btn {
-  background: linear-gradient(135deg, rgba(0, 212, 255, 0.10), rgba(255, 255, 255, 0.02));
-  border-color: rgba(0, 212, 255, 0.18);
-}
-
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(180px, 1fr));
@@ -321,7 +290,9 @@ body {
 .dashboard-row,
 .dashboard-inline-detail,
 .coach-profile-card,
-.quick-action-btn {
+.quick-action-btn,
+.version-card,
+.setup-connection-card {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
@@ -356,6 +327,10 @@ body {
   font-size: 14px;
   line-height: 1.6;
   color: var(--text-secondary);
+}
+
+.latest-activity-card .card-body {
+  min-height: 90px;
 }
 
 .options-grid {
@@ -462,6 +437,76 @@ body {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.setup-top-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.version-card,
+.setup-connection-card {
+  padding: var(--spacing-lg);
+}
+
+.version-kicker {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--spacing-sm);
+}
+
+.version-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+}
+
+.version-sub,
+.setup-connection-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.setup-action-bar {
+  display: flex;
+  gap: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  flex-wrap: wrap;
+}
+
+.primary-action-btn,
+.secondary-action-btn {
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.primary-action-btn {
+  background: linear-gradient(135deg, rgba(108, 99, 255, 0.20), rgba(138, 131, 255, 0.10));
+  border-color: rgba(108, 99, 255, 0.35);
+}
+
+.secondary-action-btn {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.10), rgba(255, 255, 255, 0.02));
+  border-color: rgba(0, 212, 255, 0.18);
+}
+
+.small-btn {
+  padding: 10px 14px;
+  font-size: 13px;
+  border-radius: var(--radius-md);
 }
 
 .setup-form {
@@ -744,8 +789,12 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .action-bar {
+  .setup-top-grid {
     grid-template-columns: 1fr;
+  }
+
+  .setup-action-bar {
+    flex-direction: column;
   }
 
   .screen-header h2 {

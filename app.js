@@ -47,23 +47,23 @@ const app = {
     activity7d: [28, 34, 52, 20, 41, 58, 43],
     stress7d: [42, 39, 48, 51, 44, 36, 34],
 
-    hrv1m: [50,51,50,52,53,54,55,54,53,55,56,55,57,58,57,59,60,58,57,59,60,61,60,59,61,62,61,60,61,62],
-    rhr1m: [55,55,54,54,54,53,53,54,53,52,52,53,52,51,51,52,51,50,50,51,50,49,50,49,49,50,49,49,49,49],
-    vo2max1m: [54,54,54,54,54,54,55,55,55,55,55,55,55,55,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56],
-    steps1m: [9200,9800,10200,11000,8900,9600,10040,10400,11200,11800,9900,10200,10600,10900,11300,11500,11900,12100,12500,12800,11700,11000,10800,11400,12200,13000,13600,14100,13800,12480],
-    calories1m: [2350,2400,2480,2510,2320,2380,2440,2500,2570,2620,2410,2460,2520,2590,2630,2670,2710,2760,2800,2850,2740,2680,2640,2700,2790,2860,2920,2980,2940,2860],
+    hrv1m: [50, 51, 50, 52, 53, 54, 55, 54, 53, 55, 56, 55, 57, 58, 57, 59, 60, 58, 57, 59, 60, 61, 60, 59, 61, 62, 61, 60, 61, 62],
+    rhr1m: [55, 55, 54, 54, 54, 53, 53, 54, 53, 52, 52, 53, 52, 51, 51, 52, 51, 50, 50, 51, 50, 49, 50, 49, 49, 50, 49, 49, 49, 49],
+    vo2max1m: [54, 54, 54, 54, 54, 54, 55, 55, 55, 55, 55, 55, 55, 55, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56],
+    steps1m: [9200, 9800, 10200, 11000, 8900, 9600, 10040, 10400, 11200, 11800, 9900, 10200, 10600, 10900, 11300, 11500, 11900, 12100, 12500, 12800, 11700, 11000, 10800, 11400, 12200, 13000, 13600, 14100, 13800, 12480],
+    calories1m: [2350, 2400, 2480, 2510, 2320, 2380, 2440, 2500, 2570, 2620, 2410, 2460, 2520, 2590, 2630, 2670, 2710, 2760, 2800, 2850, 2740, 2680, 2640, 2700, 2790, 2860, 2920, 2980, 2940, 2860],
 
-    hrv6m: [48,50,53,56,59,62],
-    rhr6m: [56,55,54,52,50,49],
-    vo2max6m: [52,53,54,55,55,56],
-    steps6m: [8800,9300,9700,10800,11700,12480],
-    calories6m: [2280,2360,2440,2580,2720,2860],
+    hrv6m: [48, 50, 53, 56, 59, 62],
+    rhr6m: [56, 55, 54, 52, 50, 49],
+    vo2max6m: [52, 53, 54, 55, 55, 56],
+    steps6m: [8800, 9300, 9700, 10800, 11700, 12480],
+    calories6m: [2280, 2360, 2440, 2580, 2720, 2860],
 
-    hrv12m: [44,45,46,48,49,50,52,54,56,58,60,62],
-    rhr12m: [58,58,57,56,56,55,54,53,52,51,50,49],
-    vo2max12m: [50,50,51,51,52,52,53,54,54,55,55,56],
-    steps12m: [7600,7800,8100,8500,8800,9200,9600,10100,10800,11400,12000,12480],
-    calories12m: [2140,2180,2220,2260,2310,2360,2410,2480,2580,2680,2780,2860]
+    hrv12m: [44, 45, 46, 48, 49, 50, 52, 54, 56, 58, 60, 62],
+    rhr12m: [58, 58, 57, 56, 56, 55, 54, 53, 52, 51, 50, 49],
+    vo2max12m: [50, 50, 51, 51, 52, 52, 53, 54, 54, 55, 55, 56],
+    steps12m: [7600, 7800, 8100, 8500, 8800, 9200, 9600, 10100, 10800, 11400, 12000, 12480],
+    calories12m: [2140, 2180, 2220, 2260, 2310, 2360, 2410, 2480, 2580, 2680, 2780, 2860]
   }
 };
 
@@ -257,7 +257,13 @@ function calculatePace(distanceKm, movingTimeMin, type) {
 
   const minPerKm = movingTimeMin / distanceKm;
   const minutes = Math.floor(minPerKm);
-  const seconds = Math.round((minPerKm - minutes) * 60);
+  let seconds = Math.round((minPerKm - minutes) * 60);
+
+  if (seconds === 60) {
+    seconds = 0;
+    return `${minutes + 1}:00 min/km`;
+  }
+
   return `${minutes}:${String(seconds).padStart(2, '0')} min/km`;
 }
 
@@ -301,8 +307,11 @@ function switchScreen(screenName) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
 
-  document.getElementById(`screen-${screenName}`).classList.add('active');
-  document.querySelector(`[data-screen="${screenName}"]`).classList.add('active');
+  const screenEl = document.getElementById(`screen-${screenName}`);
+  const navEl = document.querySelector(`[data-screen="${screenName}"]`);
+
+  if (screenEl) screenEl.classList.add('active');
+  if (navEl) navEl.classList.add('active');
 
   app.currentScreen = screenName;
 
@@ -319,7 +328,7 @@ function setupFormHandlers() {
 function updateProfile() {
   app.userData.sport = document.getElementById('sport-select')?.value;
   app.userData.goal = document.getElementById('goal-select')?.value;
-  app.userData.days = parseInt(document.getElementById('days-input')?.value) || 5;
+  app.userData.days = parseInt(document.getElementById('days-input')?.value, 10) || 5;
   app.userData.goalDate = document.getElementById('goal-date')?.value;
 
   renderToday();
@@ -329,7 +338,10 @@ function updateProfile() {
 function updateDate() {
   const date = new Date();
   const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
-  document.getElementById('current-date').textContent = date.toLocaleDateString('de-DE', options);
+  const dateEl = document.getElementById('current-date');
+  if (dateEl) {
+    dateEl.textContent = date.toLocaleDateString('de-DE', options);
+  }
 }
 
 function initializeForm() {
@@ -422,32 +434,54 @@ function renderToday() {
   placeMarker('strain-marker-stress', stressScore);
   placeMarker('strain-marker-target', targetScore);
 
-  document.getElementById('recovery-value').textContent = recovery;
-  document.getElementById('strain-value').textContent = strain;
-  document.getElementById('sleep-value').textContent = sleep;
+  const recoveryValue = document.getElementById('recovery-value');
+  const strainValue = document.getElementById('strain-value');
+  const sleepValue = document.getElementById('sleep-value');
 
-  document.getElementById('recovery-status').textContent = getStatus(recovery);
-  document.getElementById('strain-status').textContent = getStatus(strain);
-  document.getElementById('sleep-status').textContent = getStatus(sleep);
+  const recoveryStatus = document.getElementById('recovery-status');
+  const strainStatus = document.getElementById('strain-status');
+  const sleepStatus = document.getElementById('sleep-status');
 
-  document.getElementById('stat-sleep').textContent = `${app.metrics.sleepHours}h`;
-  document.getElementById('stat-rhr').textContent = `${app.metrics.rhr}`;
-  document.getElementById('stat-hrv').textContent = `${app.metrics.hrv}ms`;
-  document.getElementById('stat-steps').textContent = `${(app.metrics.steps / 1000).toFixed(1)}k`;
+  if (recoveryValue) recoveryValue.textContent = recovery;
+  if (strainValue) strainValue.textContent = strain;
+  if (sleepValue) sleepValue.textContent = sleep;
+
+  if (recoveryStatus) recoveryStatus.textContent = getStatus(recovery);
+  if (strainStatus) strainStatus.textContent = getStatus(strain);
+  if (sleepStatus) sleepStatus.textContent = getStatus(sleep);
+
+  const statSleep = document.getElementById('stat-sleep');
+  const statRhr = document.getElementById('stat-rhr');
+  const statHrv = document.getElementById('stat-hrv');
+  const statSteps = document.getElementById('stat-steps');
+
+  if (statSleep) statSleep.textContent = `${app.metrics.sleepHours}h`;
+  if (statRhr) statRhr.textContent = `${app.metrics.rhr}`;
+  if (statHrv) statHrv.textContent = `${app.metrics.hrv}ms`;
+  if (statSteps) statSteps.textContent = `${(app.metrics.steps / 1000).toFixed(1)}k`;
 
   const today = getTodayRecommendation();
-  document.getElementById('recommendation-title').textContent = today.title;
-  document.getElementById('recommendation-text').textContent = today.text;
+  const recommendationTitle = document.getElementById('recommendation-title');
+  const recommendationText = document.getElementById('recommendation-text');
+  if (recommendationTitle) recommendationTitle.textContent = today.title;
+  if (recommendationText) recommendationText.textContent = today.text;
 
   const planned = getPlannedSession();
-  document.getElementById('planned-title').textContent = planned.title;
-  document.getElementById('planned-text').textContent = planned.text;
+  const plannedTitle = document.getElementById('planned-title');
+  const plannedText = document.getElementById('planned-text');
+  if (plannedTitle) plannedTitle.textContent = planned.title;
+  if (plannedText) plannedText.textContent = planned.text;
 
   const options = getTrainingOptions();
-  document.getElementById('option-a-title').textContent = options.a.title;
-  document.getElementById('option-a-text').textContent = options.a.text;
-  document.getElementById('option-b-title').textContent = options.b.title;
-  document.getElementById('option-b-text').textContent = options.b.text;
+  const optionATitle = document.getElementById('option-a-title');
+  const optionAText = document.getElementById('option-a-text');
+  const optionBTitle = document.getElementById('option-b-title');
+  const optionBText = document.getElementById('option-b-text');
+
+  if (optionATitle) optionATitle.textContent = options.a.title;
+  if (optionAText) optionAText.textContent = options.a.text;
+  if (optionBTitle) optionBTitle.textContent = options.b.title;
+  if (optionBText) optionBText.textContent = options.b.text;
 
   renderLatestActivityCard();
 }
@@ -652,9 +686,13 @@ function renderCoachProfile() {
 
 function useQuickQuestion(question) {
   switchScreen('coach');
-  document.querySelector('[data-screen="coach"]').classList.add('active');
-  document.getElementById('coach-input').value = question;
-  askCoach();
+  const navEl = document.querySelector('[data-screen="coach"]');
+  if (navEl) navEl.classList.add('active');
+  const input = document.getElementById('coach-input');
+  if (input) {
+    input.value = question;
+    askCoach();
+  }
 }
 
 function addCoachMessage(role, text) {
@@ -671,269 +709,7 @@ function addCoachMessage(role, text) {
   container.scrollTop = container.scrollHeight;
 }
 
-function getSportLabel() {
-  const map = {
-    Run: 'Laufen',
-    Ride: 'Radfahren',
-    Ski: 'Ski Skating',
-    Mixed: 'Mixed Sports'
-  };
-  return map[app.userData.sport] || app.userData.sport;
-}
-
-function getDaysToGoal() {
-  if (!app.userData.goalDate) return null;
-  const today = new Date();
-  const goalDate = new Date(app.userData.goalDate);
-  const ms = goalDate - today;
-  return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
-}
-
-function getRecoveryTone() {
-  const r = app.metrics.recovery;
-  const s = app.metrics.sleep;
-  const strain = getDayStrain();
-
-  if (r >= 80 && s >= 80 && strain < 65) return 'frisch';
-  if (r >= 65 && s >= 70) return 'solide';
-  if (r >= 50) return 'vorsichtig';
-  return 'müde';
-}
-
-function buildGoalSpecificAdvice() {
-  const goal = app.userData.goal;
-  const sport = app.userData.sport;
-  const days = app.userData.days;
-  const daysToGoal = getDaysToGoal();
-
-  if (goal === 'Halbmarathon') {
-    return `Für dein Ziel Halbmarathon sind ein längerer ruhiger Lauf, ein gezielter Temporeiz und mehrere lockere Einheiten pro Woche sinnvoll. Mit ${days} Trainingstagen ist Regelmäßigkeit wichtiger als einzelne harte Tage.`;
-  }
-
-  if (goal === 'Marathon') {
-    return `Für dein Marathonziel zählen vor allem ruhiger Umfang, gute Verträglichkeit und ein sauberer Longrun-Aufbau. Mit ${days} Trainingstagen sollte der Wochenrhythmus stabil und nicht zu aggressiv sein.`;
-  }
-
-  if (goal === '10 km' || goal === '5 km') {
-    return `Für ${goal} brauchst du vor allem Tempoverträglichkeit, aber nur auf einem soliden lockeren Fundament. Kurze schnelle Reize bringen nur etwas, wenn die lockeren Tage wirklich locker bleiben.`;
-  }
-
-  if (goal === 'Radrennen' || goal === 'Gran Fondo' || sport === 'Ride') {
-    return `Für dein Radziel brauchst du vor allem stabile Grundlagentage, einen klaren Qualitätsreiz pro Woche und genug Erholung zwischen intensiven Belastungen.`;
-  }
-
-  if (sport === 'Ski') {
-    return `Für Ski Skating sind ruhige Ausdauer, Technikqualität und gezielte intensive Blöcke wichtig. Die Gesamtbelastung sollte aber sauber verteilt werden.`;
-  }
-
-  if (daysToGoal !== null) {
-    return `Bis zu deinem Ziel sind es noch etwa ${daysToGoal} Tage. Gerade jetzt bringt dir ein ruhiger, konstanter Aufbau mehr als zu viele harte Spitzen.`;
-  }
-
-  return `Für dein Ziel ist ein ruhiger, klar strukturierter Aufbau sinnvoll. Der größte Hebel ist Konstanz über mehrere Wochen.`;
-}
-
-function buildWeeklyVolumeAdvice() {
-  const goal = app.userData.goal;
-  const sport = app.userData.sport;
-  const days = app.userData.days;
-
-  if (sport === 'Ride' || goal === 'Radrennen' || goal === 'Gran Fondo') {
-    if (days <= 3) return `Mit ${days} Trainingstagen pro Woche solltest du einen längeren Grundlagenreiz, einen gezielten Qualitätsreiz und einen lockeren Ergänzungstag setzen.`;
-    if (days <= 5) return `Mit ${days} Trainingstagen pro Woche passt meist 1 intensiver Tag, 1 längerer Grundlagenblock und mehrere ruhige Einheiten sehr gut.`;
-    return `Mit ${days} Trainingstagen pro Woche musst du besonders auf die Verteilung achten. Nicht zu viele mittlere Tage hintereinander.`;
-  }
-
-  if (goal === 'Halbmarathon' || goal === 'Marathon' || sport === 'Run') {
-    if (days <= 3) return `Mit ${days} Lauftagen pro Woche sollte jede Einheit einen klaren Zweck haben: locker, Qualität, länger.`;
-    if (days <= 5) return `Mit ${days} Lauftagen pro Woche ist ein stabiler Mix aus locker, einem Reiz und einem längeren Lauf meist ideal.`;
-    return `Mit ${days} Lauftagen pro Woche ist die Verteilung entscheidend. Wirklich lockere Tage machen den Unterschied.`;
-  }
-
-  return `Mit ${days} Trainingstagen pro Woche ist ein klarer Rhythmus besser als tägliches Draufpacken.`;
-}
-
-function buildIntervalsAdvice() {
-  const tone = getRecoveryTone();
-  const recovery = app.metrics.recovery;
-  const sleep = app.metrics.sleep;
-  const strain = getDayStrain();
-  const goal = app.userData.goal;
-
-  if (tone === 'frisch') {
-    return `Heute sind Intervalle eher möglich. Erholung ${recovery}, Schlaf ${sleep} und Tagesbelastung ${strain} sprechen dafür, dass du einen kontrollierten Qualitätsreiz setzen kannst. Für dein Ziel ${goal} würde ich die Einheit eher sauber als maximal laufen oder fahren.`;
-  }
-
-  if (tone === 'solide') {
-    return `Intervalle gehen heute grundsätzlich, aber eher kontrolliert. Kein All-out, sondern sauberer Reiz mit Reserve. Gerade bei Erholung ${recovery} bringt dir Qualität mit Kontrolle mehr als Härte.`;
-  }
-
-  if (tone === 'vorsichtig') {
-    return `Heute wäre ich mit Intervallen zurückhaltend. Deine aktuelle Frische ist nicht schlecht, aber auch nicht ideal für harte Qualität. Eher moderat statt maximal.`;
-  }
-
-  return `Heute eher keine harten Intervalle. Deine aktuelle Kombination aus Erholung, Schlaf und Tagesbelastung spricht mehr für locker, Technik oder ruhige Grundlage.`;
-}
-
-function buildTodayTrainingAnswer() {
-  const recommendation = getTodayRecommendation();
-  const planned = getPlannedSession();
-  const options = getTrainingOptions();
-  const latest = getLatestActivity();
-  const latestText = latest
-    ? `Die letzte Einheit war "${latest.name}" mit ${latest.distanceKm.toFixed(1)} km in ${latest.movingTimeMin} min.`
-    : `Es ist noch keine letzte Strava-Aktivität geladen.`;
-
-  return [
-    `Heute würde ich dir Folgendes empfehlen: ${recommendation.title}.`,
-    `Geplante Richtung: ${planned.title}. ${planned.text}`,
-    `Option A: ${options.a.title}. ${options.a.text}`,
-    `Option B: ${options.b.title}. ${options.b.text}`,
-    latestText
-  ].join('<br><br>');
-}
-
-function buildRecoveryAnswer() {
-  const tone = getRecoveryTone();
-  const recovery = app.metrics.recovery;
-  const sleep = app.metrics.sleep;
-  const hrv = app.metrics.hrv;
-  const rhr = app.metrics.rhr;
-
-  if (tone === 'frisch') {
-    return `Du wirkst heute recht frisch. Erholung ${recovery}, Schlaf ${sleep}, HRV ${hrv} ms und Ruhepuls ${rhr} sprechen eher dafür, dass dein System auf Belastung vorbereitet ist. Ein guter Tag für Qualität mit Kontrolle.`;
-  }
-
-  if (tone === 'solide') {
-    return `Du bist heute ordentlich belastbar, aber nicht maximal frisch. Erholung ${recovery} und Schlaf ${sleep} sind okay. Das passt gut für locker bis moderat oder für einen sauber dosierten Reiz.`;
-  }
-
-  if (tone === 'vorsichtig') {
-    return `Deine Erholung ist heute eher mittel. Ich würde die Belastung bewusst steuern und lieber sauber trainieren als hart. Das schützt die nächsten Tage.`;
-  }
-
-  return `Heute steht Regeneration im Vordergrund. Deine Erholung ist zu niedrig, um harte Qualität sinnvoll unterzubringen. Locker, kurz oder Pause wäre die bessere Entscheidung.`;
-}
-
-function buildGoalAnswer() {
-  const goalAdvice = buildGoalSpecificAdvice();
-  const daysToGoal = getDaysToGoal();
-
-  if (daysToGoal !== null) {
-    return `${goalAdvice}<br><br>Bis zum Ziel sind es noch ungefähr ${daysToGoal} Tage. Je näher du an den Wettkampf kommst, desto wichtiger werden Rhythmus, Frische und saubere Prioritäten.`;
-  }
-
-  return goalAdvice;
-}
-
-function buildWeeklyPlanAnswer() {
-  const goal = app.userData.goal;
-  const days = app.userData.days;
-  const sport = getSportLabel();
-
-  return [
-    `Für ${sport} mit dem Ziel ${goal} und ${days} Trainingstagen pro Woche würde ich grob so denken:`,
-    `1 klarer Qualitätsreiz pro Woche.`,
-    `1 längere oder umfangsorientierte Einheit.`,
-    `Die restlichen Tage überwiegend locker oder regenerativ.`,
-    `Nicht mehrere fordernde Tage direkt hintereinander.`,
-    buildWeeklyVolumeAdvice()
-  ].join('<br><br>');
-}
-
-function buildVo2Answer() {
-  const sport = app.userData.sport;
-
-  if (sport === 'Ride') {
-    return `Wenn du deine VO2max verbessern willst, brauchst du nicht ständig hart zu fahren. Meist reichen 1 bis 2 gezielte Reize pro Woche, eingebettet in genug ruhige Grundlage. Zu viele harte Tage drücken oft eher die Qualität.`;
-  }
-
-  return `Wenn du deine VO2max verbessern willst, sind gezielte intensive Reize sinnvoll, aber nur auf einer guten lockeren Basis. Meist bringt dir 1 sauberer Qualitätsreiz pro Woche mehr als mehrfach halb-harte Einheiten.`;
-}
-
-function buildLongRunAnswer() {
-  if (app.userData.goal === 'Marathon') {
-    return `Für dein Marathonziel ist der Longrun einer der wichtigsten Bausteine. Er sollte überwiegend ruhig sein, gut verträglich bleiben und dich nicht so leer machen, dass die Folgetage leiden.`;
-  }
-
-  if (app.userData.goal === 'Halbmarathon') {
-    return `Für den Halbmarathon ist der längere ruhige Lauf wichtig, aber nicht so dominant wie beim Marathon. Entscheidend ist, dass er regelmäßig kommt und dich nicht für die Qualitätstage zerstört.`;
-  }
-
-  return `Längere Einheiten sind wertvoll, wenn sie sauber dosiert sind. Sie sollen Stabilität aufbauen, nicht dich komplett leeren.`;
-}
-
-function buildRaceReadinessAnswer() {
-  const tone = getRecoveryTone();
-  const daysToGoal = getDaysToGoal();
-
-  if (daysToGoal !== null && daysToGoal <= 10) {
-    return `Wenn dein Wettkampf nah ist, zählt jetzt Frische mehr als zusätzliche Härte. Du wirst eher durch gute Beine am Start schneller als durch noch einen extra harten Reiz.`;
-  }
-
-  if (tone === 'frisch') {
-    return `Du wirkst aktuell in einer guten Richtung. Wenn du diesen Rhythmus hältst, bist du auf einem ordentlichen Weg Richtung Wettkampf.`;
-  }
-
-  if (tone === 'solide') {
-    return `Du bist auf Kurs, aber du profitierst jetzt eher von Konstanz als von Eskalation. Ein sauberer Aufbau ist aktuell wichtiger als maximale Härte.`;
-  }
-
-  return `Im Moment würde ich zuerst die Frische stabilisieren. Wettkampfform entsteht nicht nur durch Belastung, sondern auch dadurch, dass du den Reiz überhaupt gut verarbeiten kannst.`;
-}
-
-function buildFallbackCoachAnswer() {
-  return [
-    `Aus deiner aktuellen Lage würde ich so denken:`,
-    buildRecoveryAnswer(),
-    buildGoalSpecificAdvice(),
-    `Heute zählt vor allem, dass dein Training zu deiner momentanen Frische passt und nicht nur zu deinem Ehrgeiz.`
-  ].join('<br><br>');
-}
-
-function buildCoachAnswer(question) {
-  const q = question.toLowerCase();
-
-  if (q.includes('heute') || q.includes('trainieren heute') || q.includes('was soll ich heute')) {
-    return buildTodayTrainingAnswer();
-  }
-
-  if (q.includes('intervall') || q.includes('intervalle') || q.includes('tempo')) {
-    return buildIntervalsAdvice();
-  }
-
-  if (q.includes('erholung') || q.includes('regeneration') || q.includes('fit') || q.includes('frisch')) {
-    return buildRecoveryAnswer();
-  }
-
-  if (q.includes('wochenplan') || q.includes('woche')) {
-    return buildWeeklyPlanAnswer();
-  }
-
-  if (q.includes('wie viel') || q.includes('umfang') || q.includes('pro woche')) {
-    return buildWeeklyVolumeAdvice();
-  }
-
-  if (q.includes('ziel') || q.includes('wettkampf') || q.includes('halbmarathon') || q.includes('marathon') || q.includes('radrennen') || q.includes('gran fondo')) {
-    return buildGoalAnswer();
-  }
-
-  if (q.includes('vo2') || q.includes('vo2max')) {
-    return buildVo2Answer();
-  }
-
-  if (q.includes('longrun') || q.includes('langer lauf')) {
-    return buildLongRunAnswer();
-  }
-
-  if (q.includes('bereit') || q.includes('wettkampfform') || q.includes('rennen')) {
-    return buildRaceReadinessAnswer();
-  }
-
-  return buildFallbackCoachAnswer();
-}
-
-function askCoach() {
+async function askCoach() {
   const input = document.getElementById('coach-input');
   if (!input) return;
 
@@ -942,7 +718,56 @@ function askCoach() {
 
   input.value = '';
   addCoachMessage('user', question);
-  addCoachMessage('assistant', buildCoachAnswer(question));
+
+  const loadingId = `coach-loading-${Date.now()}`;
+  const container = document.getElementById('coach-messages');
+  const div = document.createElement('div');
+  div.className = 'coach-message assistant';
+  div.id = loadingId;
+  div.innerHTML = `
+    <div class="coach-message-role">Coach</div>
+    <div class="coach-message-bubble">Denke über dein Training nach...</div>
+  `;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+
+  try {
+    const latestActivity = getLatestActivity();
+    const payload = {
+      question,
+      userData: app.userData,
+      metrics: app.metrics,
+      activities: app.activities,
+      latestActivity,
+      dayStrain: getDayStrain()
+    };
+
+    const response = await fetch(`${API_BASE}/api/coach`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    const loadingEl = document.getElementById(loadingId);
+    if (loadingEl) loadingEl.remove();
+
+    if (!data.ok || !data.answer) {
+      addCoachMessage('assistant', 'Ich konnte gerade keine KI-Antwort laden. Prüfe bitte dein Backend und den OpenAI API Key.');
+      return;
+    }
+
+    addCoachMessage('assistant', data.answer.replace(/\n/g, '<br>'));
+  } catch (error) {
+    console.error(error);
+    const loadingEl = document.getElementById(loadingId);
+    if (loadingEl) loadingEl.remove();
+
+    addCoachMessage('assistant', 'Gerade gibt es ein Problem mit der Coach-Verbindung. Bitte prüfe, ob dein Backend läuft.');
+  }
 }
 
 function dashboardItems() {

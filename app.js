@@ -29,6 +29,8 @@ const app = {
   },
 
   stravaConnected: false,
+  isConnecting: false,
+  isRefreshing: false,
   activities: [],
 
   history: {
@@ -68,6 +70,7 @@ const app = {
 document.addEventListener('DOMContentLoaded', async () => {
   setupNavigation();
   setupFormHandlers();
+  setupCoachInputButton();
   updateDate();
   initializeForm();
 
@@ -78,7 +81,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderCalendar();
   renderDashboard();
   renderCoachProfile();
+  updateActionButtons();
 });
+
+function setupCoachInputButton() {
+  const sendBtn = document.querySelector('.coach-btn-send');
+  if (sendBtn && !sendBtn.dataset.bound) {
+    sendBtn.dataset.bound = 'true';
+  }
+}
 
 async function initializeBackendData() {
   await checkStravaStatus();
@@ -87,34 +98,103 @@ async function initializeBackendData() {
   }
 }
 
+function updateConnectionStatus(mode = null) {
+  const statusEl = document.getElementById('connection-status');
+  if (!statusEl) return;
+
+  if (mode === 'connecting') {
+    statusEl.innerHTML = `<span class="status-dot"></span><span>Strava verbindet...</span>`;
+    return;
+  }
+
+  if (mode === 'refreshing') {
+    statusEl.innerHTML = `<span class="status-dot"></span><span>Daten werden geladen...</span>`;
+    return;
+  }
+
+  if (app.stravaConnected) {
+    statusEl.innerHTML = `<span class="status-dot"></span><span>Strava verbunden</span>`;
+  } else {
+    statusEl.innerHTML = `<span class="status-dot"></span><span>Demo Modus</span>`;
+  }
+}
+
+function updateActionButtons() {
+  const primaryBtn = document.querySelector('.primary-action-btn');
+  const secondaryBtn = document.querySelector('.secondary-action-btn');
+
+  if (primaryBtn) {
+    primaryBtn.disabled = app.isConnecting || app.isRefreshing;
+    primaryBtn.textContent = app.isConnecting
+      ? 'Strava wird geöffnet...'
+      : (app.stravaConnected ? 'Strava erneut öffnen' : 'Strava verbinden');
+    primaryBtn.style.opacity = primaryBtn.disabled ? '0.7' : '1';
+    primaryBtn.style.pointerEvents = primaryBtn.disabled ? 'none' : 'auto';
+  }
+
+  if (secondaryBtn) {
+    secondaryBtn.disabled = app.isConnecting || app.isRefreshing;
+    secondaryBtn.textContent = app.isRefreshing ? 'Aktualisiere...' : 'Daten aktualisieren';
+    secondaryBtn.style.opacity = secondaryBtn.disabled ? '0.7' : '1';
+    secondaryBtn.style.pointerEvents = secondaryBtn.disabled ? 'none' : 'auto';
+  }
+}
+
 async function connectStravaFromApp() {
+  if (app.isConnecting || app.isRefreshing) return;
+
+  app.isConnecting = true;
+  updateConnectionStatus('connecting');
+  updateActionButtons();
+
   try {
     const response = await fetch(`${API_BASE}/api/strava/login-url`);
     const data = await response.json();
 
     if (!data.ok || !data.url) {
-      alert("Strava-Login-URL konnte nicht geladen werden.");
-      return;
+      throw new Error('Strava-Login-URL konnte nicht geladen werden.');
     }
 
     window.open(data.url, "_blank");
+    alert("Strava-Fenster geöffnet. Nach der Freigabe bitte zurückkommen und auf 'Daten aktualisieren' klicken.");
   } catch (error) {
     console.error(error);
     alert("Fehler beim Öffnen der Strava-Verbindung.");
+  } finally {
+    app.isConnecting = false;
+    updateConnectionStatus();
+    updateActionButtons();
   }
 }
 
 async function refreshStravaData() {
-  await checkStravaStatus();
-  if (app.stravaConnected) {
+  if (app.isConnecting || app.isRefreshing) return;
+
+  app.isRefreshing = true;
+  updateConnectionStatus('refreshing');
+  updateActionButtons();
+
+  try {
+    await checkStravaStatus();
+
+    if (!app.stravaConnected) {
+      alert("Strava ist noch nicht verbunden.");
+      return;
+    }
+
     await loadStravaActivities();
     renderToday();
     renderActivities();
     renderCoachProfile();
     renderDashboard();
     alert("Strava-Daten aktualisiert.");
-  } else {
-    alert("Strava ist noch nicht verbunden.");
+  } catch (error) {
+    console.error(error);
+    alert("Fehler beim Aktualisieren der Strava-Daten.");
+  } finally {
+    app.isRefreshing = false;
+    updateConnectionStatus();
+    updateActionButtons();
   }
 }
 
@@ -122,20 +202,14 @@ async function checkStravaStatus() {
   try {
     const response = await fetch(`${API_BASE}/api/strava/status`);
     const data = await response.json();
-
     app.stravaConnected = !!data.connected;
-
-    const statusEl = document.getElementById('connection-status');
-    if (statusEl) {
-      if (app.stravaConnected) {
-        statusEl.innerHTML = `<span class="status-dot"></span><span>Strava verbunden</span>`;
-      } else {
-        statusEl.innerHTML = `<span class="status-dot"></span><span>Demo Modus</span>`;
-      }
-    }
+    updateConnectionStatus();
+    updateActionButtons();
   } catch (error) {
     console.error("Fehler bei Strava-Status:", error);
     app.stravaConnected = false;
+    updateConnectionStatus();
+    updateActionButtons();
   }
 }
 

@@ -70,7 +70,6 @@ const app = {
 document.addEventListener('DOMContentLoaded', async () => {
   setupNavigation();
   setupFormHandlers();
-  setupCoachInputButton();
   updateDate();
   initializeForm();
 
@@ -83,13 +82,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderCoachProfile();
   updateActionButtons();
 });
-
-function setupCoachInputButton() {
-  const sendBtn = document.querySelector('.coach-btn-send');
-  if (sendBtn && !sendBtn.dataset.bound) {
-    sendBtn.dataset.bound = 'true';
-  }
-}
 
 async function initializeBackendData() {
   await checkStravaStatus();
@@ -219,14 +211,27 @@ async function loadStravaActivities() {
     const data = await response.json();
 
     if (data.ok && Array.isArray(data.activities)) {
-      app.activities = data.activities.map(activity => ({
-        id: activity.id,
-        type: activity.type || 'Workout',
-        name: activity.name || 'Aktivität',
-        distanceKm: activity.distance ? activity.distance / 1000 : 0,
-        movingTimeMin: activity.moving_time ? Math.round(activity.moving_time / 60) : 0,
-        load: estimateActivityLoad(activity)
-      }));
+      app.activities = data.activities.map(activity => {
+        const distanceKm = activity.distance ? activity.distance / 1000 : 0;
+        const movingTimeMin = activity.moving_time ? Math.round(activity.moving_time / 60) : 0;
+        const avgHeartrate = activity.average_heartrate || null;
+        const pace = calculatePace(distanceKm, movingTimeMin, activity.type);
+        const speed = calculateSpeed(distanceKm, movingTimeMin, activity.type);
+
+        return {
+          id: activity.id,
+          type: activity.type || 'Workout',
+          icon: getActivityIcon(activity.type),
+          name: activity.name || 'Aktivität',
+          distanceKm,
+          movingTimeMin,
+          averageHeartrate: avgHeartrate,
+          pace,
+          speed,
+          startDate: activity.start_date || null,
+          load: estimateActivityLoad(activity)
+        };
+      });
     } else {
       app.activities = [];
     }
@@ -236,17 +241,53 @@ async function loadStravaActivities() {
   }
 }
 
+function getActivityIcon(type) {
+  if (type === 'Run') return '🏃';
+  if (type === 'Ride') return '🚴';
+  if (type === 'Walk') return '🚶';
+  if (type === 'Hike') return '🥾';
+  if (type === 'Workout') return '🏋️';
+  if (type === 'Swim') return '🏊';
+  return '⚡';
+}
+
+function calculatePace(distanceKm, movingTimeMin, type) {
+  if (type !== 'Run' && type !== 'Walk' && type !== 'Hike') return null;
+  if (!distanceKm || distanceKm <= 0) return null;
+
+  const minPerKm = movingTimeMin / distanceKm;
+  const minutes = Math.floor(minPerKm);
+  const seconds = Math.round((minPerKm - minutes) * 60);
+  return `${minutes}:${String(seconds).padStart(2, '0')} min/km`;
+}
+
+function calculateSpeed(distanceKm, movingTimeMin, type) {
+  if (type !== 'Ride') return null;
+  if (!distanceKm || !movingTimeMin) return null;
+
+  const kmh = distanceKm / (movingTimeMin / 60);
+  return `${kmh.toFixed(1)} km/h`;
+}
+
 function estimateActivityLoad(activity) {
   const movingMinutes = activity.moving_time ? activity.moving_time / 60 : 0;
   const distanceKm = activity.distance ? activity.distance / 1000 : 0;
   const avgHeartrate = activity.average_heartrate || 0;
 
   let load = 0;
-  load += movingMinutes * 0.45;
-  load += distanceKm * 1.8;
+  load += movingMinutes * 0.4;
+  load += distanceKm * 1.6;
 
   if (avgHeartrate > 0) {
-    load += (avgHeartrate - 90) * 0.18;
+    load += Math.max(0, avgHeartrate - 95) * 0.22;
+  }
+
+  if (activity.type === 'Ride') {
+    load += 8;
+  }
+
+  if (activity.type === 'Run') {
+    load += 5;
   }
 
   return Math.max(5, Math.min(100, Math.round(load)));
@@ -317,6 +358,10 @@ function getActivityLoadToday() {
   return app.activities.reduce((sum, item) => sum + item.load, 0);
 }
 
+function getLatestActivity() {
+  return app.activities.length ? app.activities[0] : null;
+}
+
 function getTargetStrain() {
   const recovery = app.metrics.recovery;
   const sleep = app.metrics.sleep;
@@ -328,7 +373,7 @@ function getTargetStrain() {
 }
 
 function getDayStrain() {
-  const activityNorm = normalize(getActivityLoadToday(), 0, 140);
+  const activityNorm = normalize(getActivityLoadToday(), 0, 160);
   const stressNorm = Math.round(app.metrics.stress);
   return Math.max(1, Math.min(100, Math.round(activityNorm * 0.65 + stressNorm * 0.35)));
 }
@@ -370,7 +415,7 @@ function renderToday() {
   const recovery = app.metrics.recovery;
   const sleep = app.metrics.sleep;
   const strain = getDayStrain();
-  const activityScore = normalize(getActivityLoadToday(), 0, 140);
+  const activityScore = normalize(getActivityLoadToday(), 0, 160);
   const stressScore = Math.round(app.metrics.stress);
   const targetScore = getTargetStrain();
 
@@ -414,18 +459,23 @@ function getTodayRecommendation() {
   const recovery = app.metrics.recovery;
   const sleep = app.metrics.sleep;
   const strain = getDayStrain();
+  const latest = getLatestActivity();
 
   if (recovery < 45 || sleep < 60) {
     return {
       title: 'Heute eher regenerativ',
-      text: 'Deine Erholung oder dein Schlaf sind heute nicht ideal. Ruhig und kontrolliert ist sinnvoller als hart.'
+      text: latest
+        ? `Deine Erholung ist heute nicht ideal. Nach deiner letzten Einheit "${latest.name}" passt eher locker oder Pause.`
+        : 'Deine Erholung oder dein Schlaf sind heute nicht ideal. Ruhig und kontrolliert ist sinnvoller als hart.'
     };
   }
 
   if (recovery >= 70 && strain < 70) {
     return {
       title: 'Heute Qualität möglich',
-      text: 'Du bist recht frisch. Ein kontrollierter Reiz ist heute möglich, solange du sauber und nicht maximal trainierst.'
+      text: latest
+        ? `Du bist recht frisch. Nach "${latest.name}" ist heute ein kontrollierter Reiz möglich.`
+        : 'Du bist recht frisch. Ein kontrollierter Reiz ist heute möglich, solange du sauber und nicht maximal trainierst.'
     };
   }
 
@@ -514,17 +564,28 @@ function renderActivities() {
     return;
   }
 
-  container.innerHTML = app.activities.map(activity => `
-    <div class="dashboard-row">
-      <div class="dashboard-row-left">
-        <div class="dashboard-row-label">${activity.type}</div>
-        <div class="dashboard-row-sub">${activity.name} · ${activity.distanceKm.toFixed(1)} km · Load ${activity.load}</div>
+  container.innerHTML = app.activities.map(activity => {
+    const extraLine = [];
+
+    if (activity.pace) extraLine.push(activity.pace);
+    if (activity.speed) extraLine.push(activity.speed);
+    if (activity.averageHeartrate) extraLine.push(`${Math.round(activity.averageHeartrate)} bpm`);
+
+    return `
+      <div class="dashboard-row">
+        <div class="dashboard-row-left">
+          <div class="dashboard-row-label">${activity.icon} ${activity.type}</div>
+          <div class="dashboard-row-sub">
+            ${activity.name} · ${activity.distanceKm.toFixed(1)} km · ${activity.load} Load
+            ${extraLine.length ? `· ${extraLine.join(' · ')}` : ''}
+          </div>
+        </div>
+        <div class="dashboard-row-right">
+          <div class="dashboard-row-value">${activity.movingTimeMin} min</div>
+        </div>
       </div>
-      <div class="dashboard-row-right">
-        <div class="dashboard-row-value">${activity.movingTimeMin} min</div>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function renderCalendar() {

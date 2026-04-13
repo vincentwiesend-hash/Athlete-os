@@ -29,7 +29,6 @@ const app = {
   },
 
   stravaConnected: false,
-
   activities: [],
 
   history: {
@@ -88,6 +87,37 @@ async function initializeBackendData() {
   }
 }
 
+async function connectStravaFromApp() {
+  try {
+    const response = await fetch(`${API_BASE}/api/strava/login-url`);
+    const data = await response.json();
+
+    if (!data.ok || !data.url) {
+      alert("Strava-Login-URL konnte nicht geladen werden.");
+      return;
+    }
+
+    window.open(data.url, "_blank");
+  } catch (error) {
+    console.error(error);
+    alert("Fehler beim Öffnen der Strava-Verbindung.");
+  }
+}
+
+async function refreshStravaData() {
+  await checkStravaStatus();
+  if (app.stravaConnected) {
+    await loadStravaActivities();
+    renderToday();
+    renderActivities();
+    renderCoachProfile();
+    renderDashboard();
+    alert("Strava-Daten aktualisiert.");
+  } else {
+    alert("Strava ist noch nicht verbunden.");
+  }
+}
+
 async function checkStravaStatus() {
   try {
     const response = await fetch(`${API_BASE}/api/strava/status`);
@@ -138,7 +168,6 @@ function estimateActivityLoad(activity) {
   const avgHeartrate = activity.average_heartrate || 0;
 
   let load = 0;
-
   load += movingMinutes * 0.45;
   load += distanceKm * 1.8;
 
@@ -208,10 +237,6 @@ function initializeForm() {
 function normalize(value, min, max) {
   const clamped = Math.max(min, Math.min(max, value));
   return Math.round(((clamped - min) / (max - min)) * 100);
-}
-
-function getTodayDateString() {
-  return new Date().toISOString().slice(0, 10);
 }
 
 function getActivityLoadToday() {

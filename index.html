@@ -207,24 +207,42 @@
 
       <section class="screen" id="screen-setup">
         <div class="screen-header">
-          <h2>Profileinstellungen</h2>
-          <p class="screen-description">Passe dein Athletenprofil und die Verbindung an</p>
+          <h2>Setup</h2>
+          <p class="screen-description">Profil, Version und Verbindungen</p>
         </div>
 
         <div class="setup-top-grid">
-          <div class="version-card">
-            <div class="version-kicker">Software</div>
+          <div class="version-card version-card-highlight">
+            <div class="version-kicker">Version</div>
             <div class="version-value">Findus 1.0</div>
-            <div class="version-sub">Ab hier einfach auf 1.1, 1.2, 2.0 usw. erhöhen</div>
+            <div class="version-chip-row">
+              <span class="version-chip">Build aktiv</span>
+              <span class="version-chip">Local + Web</span>
+            </div>
           </div>
 
           <div class="setup-connection-card">
-            <div class="version-kicker">Strava</div>
+            <div class="setup-card-top">
+              <div>
+                <div class="version-kicker">Strava</div>
+                <div class="setup-card-title">Verbindung</div>
+              </div>
+            </div>
             <div class="setup-action-bar">
               <button class="primary-action-btn small-btn" onclick="connectStravaFromApp()">Strava verbinden</button>
               <button class="secondary-action-btn small-btn" onclick="refreshStravaData()">Daten aktualisieren</button>
             </div>
-            <div class="setup-connection-sub">Verbindung und Aktualisierung jetzt zentral im Setup</div>
+          </div>
+        </div>
+
+        <div class="setup-mini-grid">
+          <div class="setup-mini-card">
+            <div class="version-kicker">Status</div>
+            <div class="setup-mini-value">Bereit</div>
+          </div>
+          <div class="setup-mini-card">
+            <div class="version-kicker">Datenquelle</div>
+            <div class="setup-mini-value">Strava</div>
           </div>
         </div>
 

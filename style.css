@@ -292,7 +292,8 @@ body {
 .coach-profile-card,
 .quick-action-btn,
 .version-card,
-.setup-connection-card {
+.setup-connection-card,
+.setup-mini-card {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
@@ -441,14 +442,22 @@ body {
 
 .setup-top-grid {
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
+  grid-template-columns: 1fr 1.2fr;
   gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
 }
 
 .version-card,
-.setup-connection-card {
+.setup-connection-card,
+.setup-mini-card {
   padding: var(--spacing-lg);
+}
+
+.version-card-highlight {
+  background:
+    radial-gradient(circle at top right, rgba(0, 212, 255, 0.16), transparent 35%),
+    radial-gradient(circle at bottom left, rgba(108, 99, 255, 0.18), transparent 35%),
+    linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
 }
 
 .version-kicker {
@@ -460,22 +469,55 @@ body {
 }
 
 .version-value {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 700;
+  margin-bottom: var(--spacing-md);
+}
+
+.version-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.version-chip {
+  padding: 8px 12px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.setup-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-md);
   margin-bottom: var(--spacing-sm);
 }
 
-.version-sub,
-.setup-connection-sub {
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.5;
+.setup-card-title {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.setup-mini-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.setup-mini-value {
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .setup-action-bar {
   display: flex;
   gap: var(--spacing-md);
-  margin: var(--spacing-md) 0;
+  margin-top: var(--spacing-md);
   flex-wrap: wrap;
 }
 
@@ -789,7 +831,8 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .setup-top-grid {
+  .setup-top-grid,
+  .setup-mini-grid {
     grid-template-columns: 1fr;
   }
 

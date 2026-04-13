@@ -33,11 +33,6 @@
           <p class="screen-description">Dein Status für den heutigen Tag</p>
         </div>
 
-        <div class="action-bar">
-          <button class="primary-action-btn" onclick="connectStravaFromApp()">Strava verbinden</button>
-          <button class="secondary-action-btn" onclick="refreshStravaData()">Daten aktualisieren</button>
-        </div>
-
         <div class="metrics-grid">
           <div class="metric-card">
             <h3 class="metric-label">Erholung</h3>
@@ -125,6 +120,16 @@
           </div>
         </div>
 
+        <div class="recommendation-card latest-activity-card">
+          <div class="card-header">
+            <h3>⚡ Letzte Strava-Aktivität</h3>
+          </div>
+          <div class="card-body" id="latest-activity-card">
+            <h4 id="latest-activity-title">Noch keine Aktivität geladen</h4>
+            <p id="latest-activity-text">Verbinde Strava oder aktualisiere deine Daten im Setup.</p>
+          </div>
+        </div>
+
         <div class="quick-stats">
           <div class="stat-item">
             <span class="stat-label">Geschlafen</span>
@@ -203,8 +208,26 @@
       <section class="screen" id="screen-setup">
         <div class="screen-header">
           <h2>Profileinstellungen</h2>
-          <p class="screen-description">Passe dein Athletenprofil an</p>
+          <p class="screen-description">Passe dein Athletenprofil und die Verbindung an</p>
         </div>
+
+        <div class="setup-top-grid">
+          <div class="version-card">
+            <div class="version-kicker">Software</div>
+            <div class="version-value">Findus 1.0</div>
+            <div class="version-sub">Ab hier einfach auf 1.1, 1.2, 2.0 usw. erhöhen</div>
+          </div>
+
+          <div class="setup-connection-card">
+            <div class="version-kicker">Strava</div>
+            <div class="setup-action-bar">
+              <button class="primary-action-btn small-btn" onclick="connectStravaFromApp()">Strava verbinden</button>
+              <button class="secondary-action-btn small-btn" onclick="refreshStravaData()">Daten aktualisieren</button>
+            </div>
+            <div class="setup-connection-sub">Verbindung und Aktualisierung jetzt zentral im Setup</div>
+          </div>
+        </div>
+
         <form id="profile-form" class="setup-form">
           <div class="form-group">
             <label for="sport-select">Sportart</label>

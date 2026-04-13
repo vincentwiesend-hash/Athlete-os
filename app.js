@@ -1,3 +1,5 @@
+const API_BASE = "http://localhost:3000";
+
 const app = {
   currentScreen: 'today',
   dashboardRange: '7d',
@@ -26,24 +28,9 @@ const app = {
     avgHr: 67
   },
 
-  activities: [
-    {
-      id: 1,
-      type: 'Run',
-      name: 'Locker Dauerlauf',
-      distanceKm: 8.4,
-      movingTimeMin: 46,
-      load: 42
-    },
-    {
-      id: 2,
-      type: 'Ride',
-      name: 'GA1 Ausfahrt',
-      distanceKm: 36.2,
-      movingTimeMin: 92,
-      load: 58
-    }
-  ],
+  stravaConnected: false,
+
+  activities: [],
 
   history: {
     hrv7d: [54, 56, 58, 55, 59, 61, 62],
@@ -79,17 +66,88 @@ const app = {
   }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   setupNavigation();
   setupFormHandlers();
   updateDate();
   initializeForm();
+
+  await initializeBackendData();
+
   renderToday();
   renderActivities();
   renderCalendar();
   renderDashboard();
   renderCoachProfile();
 });
+
+async function initializeBackendData() {
+  await checkStravaStatus();
+  if (app.stravaConnected) {
+    await loadStravaActivities();
+  }
+}
+
+async function checkStravaStatus() {
+  try {
+    const response = await fetch(`${API_BASE}/api/strava/status`);
+    const data = await response.json();
+
+    app.stravaConnected = !!data.connected;
+
+    const statusEl = document.getElementById('connection-status');
+    if (statusEl) {
+      if (app.stravaConnected) {
+        statusEl.innerHTML = `<span class="status-dot"></span><span>Strava verbunden</span>`;
+      } else {
+        statusEl.innerHTML = `<span class="status-dot"></span><span>Demo Modus</span>`;
+      }
+    }
+  } catch (error) {
+    console.error("Fehler bei Strava-Status:", error);
+    app.stravaConnected = false;
+  }
+}
+
+async function loadStravaActivities() {
+  try {
+    const response = await fetch(`${API_BASE}/api/strava/activities`);
+    const data = await response.json();
+
+    if (data.ok && Array.isArray(data.activities)) {
+      app.activities = data.activities.map(activity => ({
+        id: activity.id,
+        type: activity.type || 'Workout',
+        name: activity.name || 'Aktivität',
+        distanceKm: activity.distance ? activity.distance / 1000 : 0,
+        movingTimeMin: activity.moving_time ? Math.round(activity.moving_time / 60) : 0,
+        load: estimateActivityLoad(activity)
+      }));
+    } else {
+      app.activities = [];
+    }
+  } catch (error) {
+    console.error("Fehler beim Laden der Strava-Aktivitäten:", error);
+    app.activities = [];
+  }
+}
+
+function estimateActivityLoad(activity) {
+  const movingMinutes = activity.moving_time ? activity.moving_time / 60 : 0;
+  const distanceKm = activity.distance ? activity.distance / 1000 : 0;
+  const avgHeartrate = activity.average_heartrate || 0;
+
+  let load = 0;
+
+  load += movingMinutes * 0.45;
+  load += distanceKm * 1.8;
+
+  if (avgHeartrate > 0) {
+    load += (avgHeartrate - 90) * 0.18;
+  }
+
+  return Math.max(5, Math.min(100, Math.round(load)));
+}
 
 function setupNavigation() {
   document.querySelectorAll('.nav-item').forEach(item => {
@@ -111,6 +169,8 @@ function switchScreen(screenName) {
 
   if (screenName === 'dashboard') renderDashboard();
   if (screenName === 'coach') renderCoachProfile();
+  if (screenName === 'activities') renderActivities();
+  if (screenName === 'today') renderToday();
 }
 
 function setupFormHandlers() {
@@ -148,6 +208,10 @@ function initializeForm() {
 function normalize(value, min, max) {
   const clamped = Math.max(min, Math.min(max, value));
   return Math.round(((clamped - min) / (max - min)) * 100);
+}
+
+function getTodayDateString() {
+  return new Date().toISOString().slice(0, 10);
 }
 
 function getActivityLoadToday() {
@@ -339,11 +403,23 @@ function renderActivities() {
   const container = document.getElementById('activities-container');
   if (!container) return;
 
+  if (!app.activities.length) {
+    container.innerHTML = `
+      <div class="dashboard-row">
+        <div class="dashboard-row-left">
+          <div class="dashboard-row-label">Keine Aktivitäten</div>
+          <div class="dashboard-row-sub">Noch keine Strava-Daten geladen</div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
   container.innerHTML = app.activities.map(activity => `
     <div class="dashboard-row">
       <div class="dashboard-row-left">
         <div class="dashboard-row-label">${activity.type}</div>
-        <div class="dashboard-row-sub">${activity.name} · ${activity.distanceKm} km · Load ${activity.load}</div>
+        <div class="dashboard-row-sub">${activity.name} · ${activity.distanceKm.toFixed(1)} km · Load ${activity.load}</div>
       </div>
       <div class="dashboard-row-right">
         <div class="dashboard-row-value">${activity.movingTimeMin} min</div>

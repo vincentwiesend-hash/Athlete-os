@@ -671,30 +671,266 @@ function addCoachMessage(role, text) {
   container.scrollTop = container.scrollHeight;
 }
 
+function getSportLabel() {
+  const map = {
+    Run: 'Laufen',
+    Ride: 'Radfahren',
+    Ski: 'Ski Skating',
+    Mixed: 'Mixed Sports'
+  };
+  return map[app.userData.sport] || app.userData.sport;
+}
+
+function getDaysToGoal() {
+  if (!app.userData.goalDate) return null;
+  const today = new Date();
+  const goalDate = new Date(app.userData.goalDate);
+  const ms = goalDate - today;
+  return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
+}
+
+function getRecoveryTone() {
+  const r = app.metrics.recovery;
+  const s = app.metrics.sleep;
+  const strain = getDayStrain();
+
+  if (r >= 80 && s >= 80 && strain < 65) return 'frisch';
+  if (r >= 65 && s >= 70) return 'solide';
+  if (r >= 50) return 'vorsichtig';
+  return 'müde';
+}
+
+function buildGoalSpecificAdvice() {
+  const goal = app.userData.goal;
+  const sport = app.userData.sport;
+  const days = app.userData.days;
+  const daysToGoal = getDaysToGoal();
+
+  if (goal === 'Halbmarathon') {
+    return `Für dein Ziel Halbmarathon sind ein längerer ruhiger Lauf, ein gezielter Temporeiz und mehrere lockere Einheiten pro Woche sinnvoll. Mit ${days} Trainingstagen ist Regelmäßigkeit wichtiger als einzelne harte Tage.`;
+  }
+
+  if (goal === 'Marathon') {
+    return `Für dein Marathonziel zählen vor allem ruhiger Umfang, gute Verträglichkeit und ein sauberer Longrun-Aufbau. Mit ${days} Trainingstagen sollte der Wochenrhythmus stabil und nicht zu aggressiv sein.`;
+  }
+
+  if (goal === '10 km' || goal === '5 km') {
+    return `Für ${goal} brauchst du vor allem Tempoverträglichkeit, aber nur auf einem soliden lockeren Fundament. Kurze schnelle Reize bringen nur etwas, wenn die lockeren Tage wirklich locker bleiben.`;
+  }
+
+  if (goal === 'Radrennen' || goal === 'Gran Fondo' || sport === 'Ride') {
+    return `Für dein Radziel brauchst du vor allem stabile Grundlagentage, einen klaren Qualitätsreiz pro Woche und genug Erholung zwischen intensiven Belastungen.`;
+  }
+
+  if (sport === 'Ski') {
+    return `Für Ski Skating sind ruhige Ausdauer, Technikqualität und gezielte intensive Blöcke wichtig. Die Gesamtbelastung sollte aber sauber verteilt werden.`;
+  }
+
+  if (daysToGoal !== null) {
+    return `Bis zu deinem Ziel sind es noch etwa ${daysToGoal} Tage. Gerade jetzt bringt dir ein ruhiger, konstanter Aufbau mehr als zu viele harte Spitzen.`;
+  }
+
+  return `Für dein Ziel ist ein ruhiger, klar strukturierter Aufbau sinnvoll. Der größte Hebel ist Konstanz über mehrere Wochen.`;
+}
+
+function buildWeeklyVolumeAdvice() {
+  const goal = app.userData.goal;
+  const sport = app.userData.sport;
+  const days = app.userData.days;
+
+  if (sport === 'Ride' || goal === 'Radrennen' || goal === 'Gran Fondo') {
+    if (days <= 3) return `Mit ${days} Trainingstagen pro Woche solltest du einen längeren Grundlagenreiz, einen gezielten Qualitätsreiz und einen lockeren Ergänzungstag setzen.`;
+    if (days <= 5) return `Mit ${days} Trainingstagen pro Woche passt meist 1 intensiver Tag, 1 längerer Grundlagenblock und mehrere ruhige Einheiten sehr gut.`;
+    return `Mit ${days} Trainingstagen pro Woche musst du besonders auf die Verteilung achten. Nicht zu viele mittlere Tage hintereinander.`;
+  }
+
+  if (goal === 'Halbmarathon' || goal === 'Marathon' || sport === 'Run') {
+    if (days <= 3) return `Mit ${days} Lauftagen pro Woche sollte jede Einheit einen klaren Zweck haben: locker, Qualität, länger.`;
+    if (days <= 5) return `Mit ${days} Lauftagen pro Woche ist ein stabiler Mix aus locker, einem Reiz und einem längeren Lauf meist ideal.`;
+    return `Mit ${days} Lauftagen pro Woche ist die Verteilung entscheidend. Wirklich lockere Tage machen den Unterschied.`;
+  }
+
+  return `Mit ${days} Trainingstagen pro Woche ist ein klarer Rhythmus besser als tägliches Draufpacken.`;
+}
+
+function buildIntervalsAdvice() {
+  const tone = getRecoveryTone();
+  const recovery = app.metrics.recovery;
+  const sleep = app.metrics.sleep;
+  const strain = getDayStrain();
+  const goal = app.userData.goal;
+
+  if (tone === 'frisch') {
+    return `Heute sind Intervalle eher möglich. Erholung ${recovery}, Schlaf ${sleep} und Tagesbelastung ${strain} sprechen dafür, dass du einen kontrollierten Qualitätsreiz setzen kannst. Für dein Ziel ${goal} würde ich die Einheit eher sauber als maximal laufen oder fahren.`;
+  }
+
+  if (tone === 'solide') {
+    return `Intervalle gehen heute grundsätzlich, aber eher kontrolliert. Kein All-out, sondern sauberer Reiz mit Reserve. Gerade bei Erholung ${recovery} bringt dir Qualität mit Kontrolle mehr als Härte.`;
+  }
+
+  if (tone === 'vorsichtig') {
+    return `Heute wäre ich mit Intervallen zurückhaltend. Deine aktuelle Frische ist nicht schlecht, aber auch nicht ideal für harte Qualität. Eher moderat statt maximal.`;
+  }
+
+  return `Heute eher keine harten Intervalle. Deine aktuelle Kombination aus Erholung, Schlaf und Tagesbelastung spricht mehr für locker, Technik oder ruhige Grundlage.`;
+}
+
+function buildTodayTrainingAnswer() {
+  const recommendation = getTodayRecommendation();
+  const planned = getPlannedSession();
+  const options = getTrainingOptions();
+  const latest = getLatestActivity();
+  const latestText = latest
+    ? `Die letzte Einheit war "${latest.name}" mit ${latest.distanceKm.toFixed(1)} km in ${latest.movingTimeMin} min.`
+    : `Es ist noch keine letzte Strava-Aktivität geladen.`;
+
+  return [
+    `Heute würde ich dir Folgendes empfehlen: ${recommendation.title}.`,
+    `Geplante Richtung: ${planned.title}. ${planned.text}`,
+    `Option A: ${options.a.title}. ${options.a.text}`,
+    `Option B: ${options.b.title}. ${options.b.text}`,
+    latestText
+  ].join('<br><br>');
+}
+
+function buildRecoveryAnswer() {
+  const tone = getRecoveryTone();
+  const recovery = app.metrics.recovery;
+  const sleep = app.metrics.sleep;
+  const hrv = app.metrics.hrv;
+  const rhr = app.metrics.rhr;
+
+  if (tone === 'frisch') {
+    return `Du wirkst heute recht frisch. Erholung ${recovery}, Schlaf ${sleep}, HRV ${hrv} ms und Ruhepuls ${rhr} sprechen eher dafür, dass dein System auf Belastung vorbereitet ist. Ein guter Tag für Qualität mit Kontrolle.`;
+  }
+
+  if (tone === 'solide') {
+    return `Du bist heute ordentlich belastbar, aber nicht maximal frisch. Erholung ${recovery} und Schlaf ${sleep} sind okay. Das passt gut für locker bis moderat oder für einen sauber dosierten Reiz.`;
+  }
+
+  if (tone === 'vorsichtig') {
+    return `Deine Erholung ist heute eher mittel. Ich würde die Belastung bewusst steuern und lieber sauber trainieren als hart. Das schützt die nächsten Tage.`;
+  }
+
+  return `Heute steht Regeneration im Vordergrund. Deine Erholung ist zu niedrig, um harte Qualität sinnvoll unterzubringen. Locker, kurz oder Pause wäre die bessere Entscheidung.`;
+}
+
+function buildGoalAnswer() {
+  const goalAdvice = buildGoalSpecificAdvice();
+  const daysToGoal = getDaysToGoal();
+
+  if (daysToGoal !== null) {
+    return `${goalAdvice}<br><br>Bis zum Ziel sind es noch ungefähr ${daysToGoal} Tage. Je näher du an den Wettkampf kommst, desto wichtiger werden Rhythmus, Frische und saubere Prioritäten.`;
+  }
+
+  return goalAdvice;
+}
+
+function buildWeeklyPlanAnswer() {
+  const goal = app.userData.goal;
+  const days = app.userData.days;
+  const sport = getSportLabel();
+
+  return [
+    `Für ${sport} mit dem Ziel ${goal} und ${days} Trainingstagen pro Woche würde ich grob so denken:`,
+    `1 klarer Qualitätsreiz pro Woche.`,
+    `1 längere oder umfangsorientierte Einheit.`,
+    `Die restlichen Tage überwiegend locker oder regenerativ.`,
+    `Nicht mehrere fordernde Tage direkt hintereinander.`,
+    buildWeeklyVolumeAdvice()
+  ].join('<br><br>');
+}
+
+function buildVo2Answer() {
+  const sport = app.userData.sport;
+
+  if (sport === 'Ride') {
+    return `Wenn du deine VO2max verbessern willst, brauchst du nicht ständig hart zu fahren. Meist reichen 1 bis 2 gezielte Reize pro Woche, eingebettet in genug ruhige Grundlage. Zu viele harte Tage drücken oft eher die Qualität.`;
+  }
+
+  return `Wenn du deine VO2max verbessern willst, sind gezielte intensive Reize sinnvoll, aber nur auf einer guten lockeren Basis. Meist bringt dir 1 sauberer Qualitätsreiz pro Woche mehr als mehrfach halb-harte Einheiten.`;
+}
+
+function buildLongRunAnswer() {
+  if (app.userData.goal === 'Marathon') {
+    return `Für dein Marathonziel ist der Longrun einer der wichtigsten Bausteine. Er sollte überwiegend ruhig sein, gut verträglich bleiben und dich nicht so leer machen, dass die Folgetage leiden.`;
+  }
+
+  if (app.userData.goal === 'Halbmarathon') {
+    return `Für den Halbmarathon ist der längere ruhige Lauf wichtig, aber nicht so dominant wie beim Marathon. Entscheidend ist, dass er regelmäßig kommt und dich nicht für die Qualitätstage zerstört.`;
+  }
+
+  return `Längere Einheiten sind wertvoll, wenn sie sauber dosiert sind. Sie sollen Stabilität aufbauen, nicht dich komplett leeren.`;
+}
+
+function buildRaceReadinessAnswer() {
+  const tone = getRecoveryTone();
+  const daysToGoal = getDaysToGoal();
+
+  if (daysToGoal !== null && daysToGoal <= 10) {
+    return `Wenn dein Wettkampf nah ist, zählt jetzt Frische mehr als zusätzliche Härte. Du wirst eher durch gute Beine am Start schneller als durch noch einen extra harten Reiz.`;
+  }
+
+  if (tone === 'frisch') {
+    return `Du wirkst aktuell in einer guten Richtung. Wenn du diesen Rhythmus hältst, bist du auf einem ordentlichen Weg Richtung Wettkampf.`;
+  }
+
+  if (tone === 'solide') {
+    return `Du bist auf Kurs, aber du profitierst jetzt eher von Konstanz als von Eskalation. Ein sauberer Aufbau ist aktuell wichtiger als maximale Härte.`;
+  }
+
+  return `Im Moment würde ich zuerst die Frische stabilisieren. Wettkampfform entsteht nicht nur durch Belastung, sondern auch dadurch, dass du den Reiz überhaupt gut verarbeiten kannst.`;
+}
+
+function buildFallbackCoachAnswer() {
+  return [
+    `Aus deiner aktuellen Lage würde ich so denken:`,
+    buildRecoveryAnswer(),
+    buildGoalSpecificAdvice(),
+    `Heute zählt vor allem, dass dein Training zu deiner momentanen Frische passt und nicht nur zu deinem Ehrgeiz.`
+  ].join('<br><br>');
+}
+
 function buildCoachAnswer(question) {
   const q = question.toLowerCase();
 
-  if (q.includes('heute')) {
-    const rec = getTodayRecommendation();
-    return `Heute empfohlen: ${rec.title}<br><br>Warum: Erholung ${app.metrics.recovery}, Schlaf ${app.metrics.sleep} und Tagesbelastung ${getDayStrain()}.<br><br>Worauf achten: Lieber sauber und kontrolliert als unnötig hart.`;
+  if (q.includes('heute') || q.includes('trainieren heute') || q.includes('was soll ich heute')) {
+    return buildTodayTrainingAnswer();
   }
 
-  if (q.includes('intervall')) {
-    if (app.metrics.recovery >= 75 && getDayStrain() < 65) {
-      return `Heute gehen Intervalle eher ja.<br><br>Warum: Deine Erholung ist gut und die Belastung noch steuerbar.<br><br>Worauf achten: Kurz und sauber, nicht maximal.`;
-    }
-    return `Heute eher keine harten Intervalle.<br><br>Warum: Deine aktuelle Frische ist dafür nicht ideal.<br><br>Worauf achten: Lieber locker oder moderat trainieren.`;
+  if (q.includes('intervall') || q.includes('intervalle') || q.includes('tempo')) {
+    return buildIntervalsAdvice();
   }
 
-  if (q.includes('wochenumfang') || q.includes('pro woche') || q.includes('wie viel')) {
-    return `Wochenumfang:<br><br>Für dein Ziel ${app.userData.goal} mit ${app.userData.days} Trainingstagen pro Woche ist Konstanz wichtiger als einzelne harte Tage.<br><br>Worauf achten: Lieber stabil und gut verträglich aufbauen.`;
+  if (q.includes('erholung') || q.includes('regeneration') || q.includes('fit') || q.includes('frisch')) {
+    return buildRecoveryAnswer();
   }
 
   if (q.includes('wochenplan') || q.includes('woche')) {
-    return `Wochenplan:<br><br>1 Schwerpunktreiz, mehrere lockere Ergänzungstage und genug Erholung zwischen den harten Reizen.<br><br>Worauf achten: Nicht zu viele fordernde Einheiten direkt hintereinander.`;
+    return buildWeeklyPlanAnswer();
   }
 
-  return `Heute empfohlen: ${getTodayRecommendation().title}<br><br>Warum: Deine Erholung, dein Schlaf und die Tagesbelastung sprechen eher für einen kontrollierten Trainingstag.<br><br>Worauf achten: Qualität nur dann, wenn du dich wirklich frisch fühlst.`;
+  if (q.includes('wie viel') || q.includes('umfang') || q.includes('pro woche')) {
+    return buildWeeklyVolumeAdvice();
+  }
+
+  if (q.includes('ziel') || q.includes('wettkampf') || q.includes('halbmarathon') || q.includes('marathon') || q.includes('radrennen') || q.includes('gran fondo')) {
+    return buildGoalAnswer();
+  }
+
+  if (q.includes('vo2') || q.includes('vo2max')) {
+    return buildVo2Answer();
+  }
+
+  if (q.includes('longrun') || q.includes('langer lauf')) {
+    return buildLongRunAnswer();
+  }
+
+  if (q.includes('bereit') || q.includes('wettkampfform') || q.includes('rennen')) {
+    return buildRaceReadinessAnswer();
+  }
+
+  return buildFallbackCoachAnswer();
 }
 
 function askCoach() {

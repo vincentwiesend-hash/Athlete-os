@@ -112,24 +112,24 @@ function updateConnectionStatus(mode = null) {
 }
 
 function updateActionButtons() {
-  const primaryBtn = document.querySelector('.primary-action-btn');
-  const secondaryBtn = document.querySelector('.secondary-action-btn');
+  const primaryButtons = document.querySelectorAll('.primary-action-btn');
+  const secondaryButtons = document.querySelectorAll('.secondary-action-btn');
 
-  if (primaryBtn) {
-    primaryBtn.disabled = app.isConnecting || app.isRefreshing;
-    primaryBtn.textContent = app.isConnecting
+  primaryButtons.forEach(btn => {
+    btn.disabled = app.isConnecting || app.isRefreshing;
+    btn.textContent = app.isConnecting
       ? 'Strava wird geöffnet...'
       : (app.stravaConnected ? 'Strava erneut öffnen' : 'Strava verbinden');
-    primaryBtn.style.opacity = primaryBtn.disabled ? '0.7' : '1';
-    primaryBtn.style.pointerEvents = primaryBtn.disabled ? 'none' : 'auto';
-  }
+    btn.style.opacity = btn.disabled ? '0.7' : '1';
+    btn.style.pointerEvents = btn.disabled ? 'none' : 'auto';
+  });
 
-  if (secondaryBtn) {
-    secondaryBtn.disabled = app.isConnecting || app.isRefreshing;
-    secondaryBtn.textContent = app.isRefreshing ? 'Aktualisiere...' : 'Daten aktualisieren';
-    secondaryBtn.style.opacity = secondaryBtn.disabled ? '0.7' : '1';
-    secondaryBtn.style.pointerEvents = secondaryBtn.disabled ? 'none' : 'auto';
-  }
+  secondaryButtons.forEach(btn => {
+    btn.disabled = app.isConnecting || app.isRefreshing;
+    btn.textContent = app.isRefreshing ? 'Aktualisiere...' : 'Daten aktualisieren';
+    btn.style.opacity = btn.disabled ? '0.7' : '1';
+    btn.style.pointerEvents = btn.disabled ? 'none' : 'auto';
+  });
 }
 
 async function connectStravaFromApp() {
@@ -282,13 +282,8 @@ function estimateActivityLoad(activity) {
     load += Math.max(0, avgHeartrate - 95) * 0.22;
   }
 
-  if (activity.type === 'Ride') {
-    load += 8;
-  }
-
-  if (activity.type === 'Run') {
-    load += 5;
-  }
+  if (activity.type === 'Ride') load += 8;
+  if (activity.type === 'Run') load += 5;
 
   return Math.max(5, Math.min(100, Math.round(load)));
 }
@@ -453,6 +448,36 @@ function renderToday() {
   document.getElementById('option-a-text').textContent = options.a.text;
   document.getElementById('option-b-title').textContent = options.b.title;
   document.getElementById('option-b-text').textContent = options.b.text;
+
+  renderLatestActivityCard();
+}
+
+function renderLatestActivityCard() {
+  const titleEl = document.getElementById('latest-activity-title');
+  const textEl = document.getElementById('latest-activity-text');
+  if (!titleEl || !textEl) return;
+
+  const latest = getLatestActivity();
+
+  if (!latest) {
+    titleEl.textContent = 'Noch keine Aktivität geladen';
+    textEl.textContent = 'Verbinde Strava oder aktualisiere deine Daten im Setup.';
+    return;
+  }
+
+  const details = [
+    `${latest.icon} ${latest.type}`,
+    `${latest.distanceKm.toFixed(1)} km`,
+    `${latest.movingTimeMin} min`,
+    `${latest.load} Load`
+  ];
+
+  if (latest.pace) details.push(latest.pace);
+  if (latest.speed) details.push(latest.speed);
+  if (latest.averageHeartrate) details.push(`${Math.round(latest.averageHeartrate)} bpm`);
+
+  titleEl.textContent = latest.name;
+  textEl.textContent = details.join(' · ');
 }
 
 function getTodayRecommendation() {

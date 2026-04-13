@@ -33,6 +33,11 @@
           <p class="screen-description">Dein Status für den heutigen Tag</p>
         </div>
 
+        <div class="action-bar">
+          <button class="primary-action-btn" onclick="connectStravaFromApp()">Strava verbinden</button>
+          <button class="secondary-action-btn" onclick="refreshStravaData()">Daten aktualisieren</button>
+        </div>
+
         <div class="metrics-grid">
           <div class="metric-card">
             <h3 class="metric-label">Erholung</h3>
@@ -54,7 +59,6 @@
               <svg class="metric-ring" viewBox="0 0 120 120">
                 <circle cx="60" cy="60" r="54" class="ring-bg"></circle>
                 <circle cx="60" cy="60" r="54" class="ring-progress strain" id="strain-ring"></circle>
-
                 <circle id="strain-marker-activity" cx="60" cy="6" r="3.5" class="marker activity"></circle>
                 <circle id="strain-marker-stress" cx="60" cy="6" r="3.5" class="marker stress"></circle>
                 <circle id="strain-marker-target" cx="60" cy="6" r="3.5" class="marker target"></circle>

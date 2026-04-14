@@ -31,11 +31,14 @@ Professionelle Trainings- und Coaching-App mit Garmin/Strava/iCloud-Kalender-Anb
 
 ## What's Been Implemented (2026-04-14)
 - Full React frontend with 6 screens (Today, Training, Coach, Calendar, Stats, Settings)
-- FastAPI backend with 20+ endpoints
+- FastAPI backend with 25+ endpoints
 - Strava OAuth connected with Vincent's tokens
 - AI Coach Vincent (Gemini 2.5 Flash) with memory
 - Morning Report AI generation
 - Weekly training plan AI generation + ICS export
+- **Trainingsplan-Tage einzeln editierbar** (Titel, Details, Typ, Intensitaet)
+- **Coach-Vorschlaege direkt in Kalender uebernehmen** (AI passt Plan an)
+- **Garmin Connect Integration** (Login, Health-Daten, Aktivitaeten, Workout-Push)
 - Scientific formulas for Recovery, Strain, Readiness (literature-based)
 - Athletic profile with race times, body metrics
 - Formula transparency page
@@ -44,13 +47,10 @@ Professionelle Trainings- und Coaching-App mit Garmin/Strava/iCloud-Kalender-Anb
 - Changelog with 3 versions
 
 ## Backlog
-- P0: Garmin Connect API integration (needs credentials)
-- P0: Garmin watch workout push
-- P1: Real Garmin data sync (currently demo metrics)
-- P1: Training plan editing (individual days)
-- P2: iCloud CalDAV real-time sync
+- P1: Real Garmin data sync in Today-Page (wenn verbunden, echte Daten statt Demo)
+- P1: iCloud CalDAV Echtzeit-Sync
+- P2: Push-Notifications (Morgenreport)
 - P2: Dark/Light mode toggle
-- P2: Push notifications
 - P3: Social features / Training groups
 
 ## Next Tasks

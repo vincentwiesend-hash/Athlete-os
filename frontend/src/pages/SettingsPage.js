@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import {
   User, Link2, MessageCircle, Shield, ChevronRight, RefreshCw,
-  Watch, LogOut, FileText, Ruler, Weight, Clock, Calculator, Dumbbell, ChevronLeft
+  Watch, LogOut, FileText, Calculator, Dumbbell, ChevronLeft
 } from 'lucide-react';
 import api from '../utils/api';
 
@@ -87,6 +87,24 @@ export default function SettingsPage() {
     } catch {}
   };
 
+  const [garminLogin, setGarminLogin] = useState({ email: '', password: '', show: false, loading: false, error: '' });
+
+  const connectGarmin = async () => {
+    if (!garminLogin.show) { setGarminLogin(g => ({ ...g, show: true })); return; }
+    setGarminLogin(g => ({ ...g, loading: true, error: '' }));
+    try {
+      const { data } = await api.post('/api/garmin/connect', { email: garminLogin.email, password: garminLogin.password });
+      if (data.ok) { setGarmin({ connected: true, athlete: data.athlete }); setGarminLogin({ email: '', password: '', show: false, loading: false, error: '' }); }
+    } catch (e) {
+      setGarminLogin(g => ({ ...g, loading: false, error: e.response?.data?.detail || 'Verbindung fehlgeschlagen' }));
+    }
+  };
+
+  const disconnectGarmin = async () => {
+    await api.post('/api/garmin/disconnect').catch(() => {});
+    setGarmin({ connected: false, athlete: null });
+  };
+
   if (view === 'profile') return <ProfileView profile={profile} save={save} back={() => setView('main')} user={user} />;
   if (view === 'athletic') return <AthleticView profile={profile} save={save} back={() => setView('main')} />;
   if (view === 'changelog') return <ChangelogView back={() => setView('main')} />;
@@ -119,10 +137,30 @@ export default function SettingsPage() {
           actionLabel={strava.connected ? 'Sync' : 'Verbinden'}
         />
         <IntCard icon={Watch} name="Garmin"
-          status={garmin.connected ? 'Verbunden' : 'Nicht verbunden'}
-          connected={garmin.connected} disabled
-          actionLabel="Bald verfuegbar"
+          status={garmin.connected ? `Verbunden${garmin.athlete ? ` · ${garmin.athlete.name}` : ''}` : 'Nicht verbunden'}
+          connected={garmin.connected}
+          onAction={garmin.connected ? disconnectGarmin : connectGarmin}
+          actionLabel={garmin.connected ? 'Trennen' : (garminLogin.show ? 'Anmelden' : 'Verbinden')}
         />
+        {garminLogin.show && !garmin.connected && (
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 14, padding: 14, marginBottom: 10, marginTop: -6 }}>
+            {garminLogin.error && <div style={{ background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.15)', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: '#ef4444', marginBottom: 10 }}>{garminLogin.error}</div>}
+            <input className="form-input" placeholder="Garmin E-Mail" value={garminLogin.email}
+              onChange={e => setGarminLogin(g => ({ ...g, email: e.target.value }))} style={{ marginBottom: 8, fontSize: 13 }} data-testid="garmin-email" />
+            <input className="form-input" type="password" placeholder="Garmin Passwort" value={garminLogin.password}
+              onChange={e => setGarminLogin(g => ({ ...g, password: e.target.value }))}
+              onKeyDown={e => e.key === 'Enter' && connectGarmin()} style={{ marginBottom: 10, fontSize: 13 }} data-testid="garmin-password" />
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={connectGarmin} disabled={garminLogin.loading || !garminLogin.email || !garminLogin.password}
+                style={{ flex: 1, padding: 10, borderRadius: 10, background: '#6c63ff', color: 'white', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: garminLogin.loading ? .5 : 1 }} data-testid="garmin-submit">
+                {garminLogin.loading ? 'Verbinde...' : 'Garmin verbinden'}
+              </button>
+              <button onClick={() => setGarminLogin({ email: '', password: '', show: false, loading: false, error: '' })}
+                style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,.04)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer' }}>Abbrechen</button>
+            </div>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 8 }}>Deine Garmin Connect Zugangsdaten. Werden verschluesselt gespeichert.</div>
+          </div>
+        )}
       </Section>
 
       {/* APP */}

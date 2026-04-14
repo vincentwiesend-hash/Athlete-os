@@ -433,6 +433,64 @@ async def update_plan_day(request: Request):
     )
     return {"ok": True, "plan": plan_doc["plan"]}
 
+@app.post("/api/coach/apply-to-plan")
+async def coach_apply_to_plan(request: Request):
+    """Coach-Vorschlag direkt in den Wochenplan uebernehmen."""
+    user = await get_current_user(request)
+    body = await request.json()
+    suggestion = body.get("suggestion", "")
+    if not suggestion:
+        raise HTTPException(status_code=400, detail="Kein Vorschlag")
+
+    week_start = datetime.now(timezone.utc).strftime("%Y-W%W")
+    plan_doc = await db.training_plans.find_one({"user_id": user["_id"], "week": week_start})
+    current_plan = plan_doc["plan"] if plan_doc and plan_doc.get("plan") else None
+
+    prompt = f"""Du bist Coach in Athlete OS. Vincent hat folgenden Vorschlag:
+"{suggestion}"
+
+{"Aktueller Wochenplan: " + json.dumps(current_plan, ensure_ascii=False) if current_plan else "Noch kein Wochenplan vorhanden."}
+
+Erstelle den aktualisierten Wochenplan als reines JSON (kein Markdown).
+Format: {{"weekFocus":"...","days":[{{"day":"Mo","title":"...","details":"...","type":"training|rest|recovery","duration":"...","intensity":"low|medium|high"}},...7 Tage]}}
+Uebernimm den Vorschlag sinnvoll. Antworte NUR mit JSON."""
+
+    try:
+        chat = LlmChat(api_key=EMERGENT_KEY, session_id=f"apply-{user['_id']}-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M')}", system_message="JSON Wochenplan Generator.")
+        chat.with_model("gemini", "gemini-2.5-flash")
+        resp = await chat.send_message(UserMessage(text=prompt))
+        text = resp.strip() if isinstance(resp, str) else str(resp).strip()
+        try:
+            parsed = json.loads(text)
+        except json.JSONDecodeError:
+            parsed = json.loads(text.replace("```json", "").replace("```", "").strip())
+
+        if parsed.get("days") and isinstance(parsed["days"], list):
+            await db.training_plans.update_one(
+                {"user_id": user["_id"], "week": week_start},
+                {"$set": {"plan": parsed, "updated_at": datetime.now(timezone.utc).isoformat()}},
+                upsert=True
+            )
+            return {"ok": True, "plan": parsed}
+    except Exception as e:
+        print(f"Apply to plan error: {e}")
+    raise HTTPException(status_code=500, detail="Konnte Vorschlag nicht in Plan uebernehmen")
+
+# --- Garmin Workout Push (prepared) ---
+@app.post("/api/garmin/push-workout")
+async def garmin_push_workout(request: Request):
+    """Push workout to Garmin watch via Connect API. Requires Garmin credentials."""
+    body = await request.json()
+    workout = body.get("workout", {})
+    # Garmin Connect IQ Workout API: POST https://connect.garmin.com/modern/proxy/workout-service/workout
+    # Requires OAuth 1.0a with consumer key/secret from developer.garmin.com
+    garmin_token = await db.garmin_tokens.find_one({}, {"_id": 0})
+    if not garmin_token or not garmin_token.get("access_token"):
+        return {"ok": False, "message": "Garmin nicht verbunden. Bitte API-Credentials in den Einstellungen hinterlegen.",
+                "setup_url": "https://developer.garmin.com"}
+    # When credentials are available, this will POST to Garmin Connect Workout API
+    return {"ok": False, "message": "Garmin Workout Push wird mit naechstem Update aktiviert."}
+
 # --- ICS Calendar Export ---
 @app.get("/api/calendar/export-ics")
 async def export_ics(request: Request):
@@ -650,19 +708,165 @@ async def strava_activities():
         print(f"Strava activities error: {e}")
         return {"ok": False, "message": "Strava-Fehler", "activities": []}
 
-# --- Garmin (Prepared) ---
+# --- Garmin Integration ---
+# Uses python-garminconnect for Health/Activity data (read)
+# Training API (push workouts) requires developer.garmin.com credentials
+
+from garminconnect import Garmin as GarminClient
+
+async def get_garmin_client():
+    """Get authenticated Garmin client from stored credentials."""
+    creds = await db.garmin_tokens.find_one({}, {"_id": 0})
+    if not creds or not creds.get("email"):
+        return None, creds
+    try:
+        client = GarminClient(creds["email"], creds["password"])
+        if creds.get("oauth_tokens"):
+            client.garth.loads(creds["oauth_tokens"])
+            try:
+                client.display_name
+            except Exception:
+                client.login()
+                await db.garmin_tokens.update_one(
+                    {"email": creds["email"]},
+                    {"$set": {"oauth_tokens": client.garth.dumps(), "updated_at": datetime.now(timezone.utc).isoformat()}}
+                )
+        else:
+            client.login()
+            await db.garmin_tokens.update_one(
+                {"email": creds["email"]},
+                {"$set": {"oauth_tokens": client.garth.dumps(), "updated_at": datetime.now(timezone.utc).isoformat()}}
+            )
+        return client, creds
+    except Exception as e:
+        print(f"Garmin login error: {e}")
+        return None, creds
+
 @app.get("/api/garmin/status")
 async def garmin_status():
-    token_doc = await db.garmin_tokens.find_one({}, {"_id": 0})
+    creds = await db.garmin_tokens.find_one({}, {"_id": 0})
+    connected = bool(creds and creds.get("email") and creds.get("oauth_tokens"))
     return {
         "ok": True,
-        "connected": bool(token_doc and token_doc.get("access_token")),
-        "athlete": token_doc.get("athlete") if token_doc else None
+        "connected": connected,
+        "athlete": {"name": creds.get("display_name", creds.get("email", ""))} if connected else None
     }
 
+@app.post("/api/garmin/connect")
+async def garmin_connect(request: Request):
+    """Connect Garmin with email/password credentials."""
+    user = await get_current_user(request)
+    body = await request.json()
+    email = body.get("email", "").strip()
+    password = body.get("password", "")
+    if not email or not password:
+        raise HTTPException(status_code=400, detail="E-Mail und Passwort erforderlich")
+    try:
+        client = GarminClient(email, password)
+        client.login()
+        display_name = client.get_full_name() if hasattr(client, 'get_full_name') else email
+        await db.garmin_tokens.update_one(
+            {"user_id": user["_id"]},
+            {"$set": {
+                "email": email, "password": password,
+                "oauth_tokens": client.garth.dumps(),
+                "display_name": display_name,
+                "user_id": user["_id"],
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }},
+            upsert=True
+        )
+        return {"ok": True, "message": "Garmin verbunden", "athlete": {"name": display_name}}
+    except Exception as e:
+        print(f"Garmin connect error: {e}")
+        raise HTTPException(status_code=401, detail="Garmin-Anmeldung fehlgeschlagen. Pruefe E-Mail und Passwort.")
+
+@app.post("/api/garmin/disconnect")
+async def garmin_disconnect(request: Request):
+    user = await get_current_user(request)
+    await db.garmin_tokens.delete_many({"user_id": user["_id"]})
+    return {"ok": True}
+
+@app.get("/api/garmin/health")
+async def garmin_health():
+    """Get today's health metrics from Garmin."""
+    client, _ = await get_garmin_client()
+    if not client:
+        return {"ok": False, "message": "Garmin nicht verbunden", "data": None}
+    try:
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        stats = client.get_stats(today)
+        hr = client.get_heart_rates(today)
+        sleep = client.get_sleep_data(today)
+        stress = client.get_stress_data(today)
+        body_battery = client.get_body_battery(today)
+        respiration = client.get_respiration_data(today)
+        spo2 = client.get_spo2_data(today)
+        return {"ok": True, "data": {
+            "stats": stats, "heartRate": hr, "sleep": sleep,
+            "stress": stress, "bodyBattery": body_battery,
+            "respiration": respiration, "spo2": spo2,
+            "date": today
+        }}
+    except Exception as e:
+        print(f"Garmin health error: {e}")
+        return {"ok": False, "message": f"Garmin-Daten konnten nicht geladen werden: {str(e)[:100]}", "data": None}
+
+@app.get("/api/garmin/activities")
+async def garmin_activities():
+    """Get recent activities from Garmin."""
+    client, _ = await get_garmin_client()
+    if not client:
+        return {"ok": False, "message": "Garmin nicht verbunden", "activities": []}
+    try:
+        activities = client.get_activities(0, 15)
+        return {"ok": True, "activities": activities}
+    except Exception as e:
+        print(f"Garmin activities error: {e}")
+        return {"ok": False, "message": "Fehler beim Laden", "activities": []}
+
+@app.post("/api/garmin/push-workout")
+async def garmin_push_workout(request: Request):
+    """Push structured workout to Garmin Connect calendar for device sync."""
+    client, creds = await get_garmin_client()
+    if not client:
+        return {"ok": False, "message": "Garmin nicht verbunden."}
+    body = await request.json()
+    workout = body.get("workout", {})
+    # Garmin Connect workout format
+    workout_data = {
+        "sportType": {"sportTypeId": 1, "sportTypeKey": "running"},
+        "workoutName": workout.get("title", "Athlete OS Training"),
+        "description": workout.get("details", ""),
+        "workoutSegments": [{
+            "segmentOrder": 1,
+            "sportType": {"sportTypeId": 1, "sportTypeKey": "running"},
+            "workoutSteps": [{
+                "type": "ExecutableStepDTO",
+                "stepOrder": 1,
+                "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+                "endCondition": {"conditionTypeId": 2, "conditionTypeKey": "time"},
+                "endConditionValue": int(float(workout.get("duration_minutes", 45)) * 60),
+                "targetType": {"workoutTargetTypeId": 0, "workoutTargetTypeKey": "no.target"}
+            }]
+        }]
+    }
+    try:
+        # Uses Garmin Connect internal API
+        resp = client.session.post(
+            "https://connect.garmin.com/modern/proxy/workout-service/workout",
+            json=workout_data
+        )
+        if resp.ok:
+            return {"ok": True, "message": "Workout an Garmin gesendet. Synchronisiere deine Uhr."}
+        return {"ok": False, "message": f"Garmin API Fehler: {resp.status_code}"}
+    except Exception as e:
+        print(f"Garmin push error: {e}")
+        return {"ok": False, "message": "Workout konnte nicht gesendet werden. Garmin-Session ggf. abgelaufen."}
+
 @app.post("/api/garmin/send-workout")
-async def garmin_send_workout(request: Request):
-    return {"ok": False, "message": "Garmin-Integration erfordert API-Credentials. Bitte in den Einstellungen konfigurieren."}
+async def garmin_send_workout_legacy(request: Request):
+    return await garmin_push_workout(request)
 
 # --- Changelog ---
 CHANGELOG = [

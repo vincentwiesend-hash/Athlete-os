@@ -10,4 +10,3 @@
 - POST /api/auth/login
 - GET /api/auth/me
 - POST /api/auth/logout
-- POST /api/auth/refresh

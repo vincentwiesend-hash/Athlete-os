@@ -174,7 +174,9 @@ async def update_profile(request: Request):
     user = await get_current_user(request)
     body = await request.json()
     update = {}
-    for key in ["sport", "goal", "days", "goalDate", "name"]:
+    allowed = ["sport", "goal", "days", "goalDate", "name", "age", "weight", "height",
+               "time5k", "time10k", "timeHalf", "timeMarathon", "maxHr", "restHr", "gender"]
+    for key in allowed:
         if key in body:
             update[key] = body[key]
     if update:
@@ -479,6 +481,66 @@ X-WR-CALNAME:Athlete OS Training
 END:VCALENDAR"""
 
     return Response(content=ics, media_type="text/calendar", headers={"Content-Disposition": "attachment; filename=athlete-os-training.ics"})
+
+# --- Morning Report ---
+@app.post("/api/morning-report")
+async def morning_report(request: Request):
+    try:
+        user = await get_current_user(request)
+        user_id = user["_id"]
+    except Exception:
+        user_id = "anonymous"
+
+    body = await request.json()
+    metrics = body.get("metrics", {})
+    yesterday = body.get("yesterday", {})
+    activities = body.get("activities", [])
+    profile = body.get("profile", {})
+
+    recent = "\n".join([
+        f"- {a.get('name', '-')}: {a.get('type', '-')}, {a.get('distanceKm', '-')} km, {a.get('movingTimeMin', '-')} min, Load {a.get('load', '-')}"
+        for a in activities[:5]
+    ]) or "Keine aktuellen Aktivitaeten"
+
+    prompt = f"""Du bist Vincent's persoenlicher Coach in Athlete OS.
+Erstelle einen kompakten Morgenreport. Antworte auf Deutsch. Max 6-8 Saetze.
+
+STIL: direkt, persoenlich, keine Floskeln. Sprich Vincent direkt an.
+
+Aktuelle Werte (von Garmin/Strava):
+- Erholung: {metrics.get('recovery', '-')} (gestern: {yesterday.get('recovery', '-')})
+- HRV: {metrics.get('hrv', '-')}ms (gestern: {yesterday.get('hrv', '-')}ms)
+- Ruhepuls: {metrics.get('rhr', '-')} (gestern: {yesterday.get('rhr', '-')})
+- Schlaf: {metrics.get('sleep', '-')}/100, {metrics.get('sleepHours', '-')}h (Tief: {metrics.get('sleepDeep', '-')}h, REM: {metrics.get('sleepRem', '-')}h)
+- Stress: {metrics.get('stress', '-')} (gestern: {yesterday.get('stress', '-')})
+- VO2max: {metrics.get('vo2max', '-')} | SpO2: {metrics.get('spo2', '-')}%
+- Body Battery: {metrics.get('bodyBattery', '-')} | Trainingsbereitschaft: {metrics.get('trainingReadiness', '-')}
+- Schritte: {metrics.get('steps', '-')} | Kalorien: {metrics.get('calories', '-')}
+
+Profil: {profile.get('sport', 'Run')} | Ziel: {profile.get('goal', '-')} | {profile.get('days', 5)} Tage/Woche
+
+Letzte Aktivitaeten:
+{recent}
+
+Bewerte:
+1. Was hat sich gegenueber gestern verbessert/verschlechtert?
+2. Wie steht es um die Erholung?
+3. Klare Trainingsempfehlung fuer heute
+4. Ein motivierender Satz"""
+
+    try:
+        chat = LlmChat(
+            api_key=EMERGENT_KEY,
+            session_id=f"morning-{user_id}-{datetime.now(timezone.utc).strftime('%Y%m%d')}",
+            system_message="Kompakter, persoenlicher Morgenreport. Deutsch. Direkt und hilfreich."
+        )
+        chat.with_model("gemini", "gemini-2.5-flash")
+        response = await chat.send_message(UserMessage(text=prompt))
+        report = response.strip() if isinstance(response, str) else str(response).strip()
+        return {"ok": True, "report": report}
+    except Exception as e:
+        print(f"Morning report error: {e}")
+        return {"ok": True, "report": "Morgenreport konnte nicht geladen werden. Deine Daten sehen insgesamt stabil aus."}
 
 # --- Strava Integration ---
 @app.get("/api/strava/login-url")

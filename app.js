@@ -31,7 +31,10 @@ const app = {
   stravaConnected: false,
   isConnecting: false,
   isRefreshing: false,
+  isGeneratingCalendar: false,
   activities: [],
+  coachHistory: [],
+  aiWeekPlan: null,
 
   history: {
     hrv7d: [54, 56, 58, 55, 59, 61, 62],
@@ -72,6 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupFormHandlers();
   updateDate();
   initializeForm();
+  initializeCoachHistory();
 
   await initializeBackendData();
 
@@ -83,11 +87,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateActionButtons();
 });
 
+function initializeCoachHistory() {
+  const messagesEl = document.getElementById('coach-messages');
+  if (!messagesEl) return;
+
+  app.coachHistory = [
+    {
+      role: 'assistant',
+      content: 'Hi Vincent — frag mich einfach nach heute, Intervallen, Umfang oder deinem Wochenplan.'
+    }
+  ];
+
+  messagesEl.innerHTML = '';
+  addCoachMessage('assistant', app.coachHistory[0].content, false);
+}
+
 async function initializeBackendData() {
   await checkStravaStatus();
   if (app.stravaConnected) {
     await loadStravaActivities();
   }
+  await generateAICalendarPlan();
 }
 
 function updateConnectionStatus(mode = null) {
@@ -175,10 +195,14 @@ async function refreshStravaData() {
     }
 
     await loadStravaActivities();
+    await generateAICalendarPlan();
+
     renderToday();
     renderActivities();
     renderCoachProfile();
     renderDashboard();
+    renderCalendar();
+
     alert("Strava-Daten aktualisiert.");
   } catch (error) {
     console.error(error);
@@ -241,6 +265,41 @@ async function loadStravaActivities() {
   }
 }
 
+async function generateAICalendarPlan() {
+  if (app.isGeneratingCalendar) return;
+
+  app.isGeneratingCalendar = true;
+
+  try {
+    const latestActivity = getLatestActivity();
+    const payload = {
+      userData: app.userData,
+      metrics: app.metrics,
+      activities: app.activities,
+      latestActivity,
+      dayStrain: getDayStrain()
+    };
+
+    const response = await fetch(`${API_BASE}/api/calendar-plan`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (data.ok && data.plan) {
+      app.aiWeekPlan = data.plan;
+    }
+  } catch (error) {
+    console.error("Fehler beim KI-Wochenplan:", error);
+  } finally {
+    app.isGeneratingCalendar = false;
+  }
+}
+
 function getActivityIcon(type) {
   if (type === 'Run') return '🏃';
   if (type === 'Ride') return '🚴';
@@ -296,9 +355,14 @@ function estimateActivityLoad(activity) {
 
 function setupNavigation() {
   document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', () => {
+    item.addEventListener('click', async () => {
       const screen = item.dataset.screen;
       switchScreen(screen);
+
+      if (screen === 'calendar' && !app.aiWeekPlan) {
+        await generateAICalendarPlan();
+        renderCalendar();
+      }
     });
   });
 }
@@ -319,10 +383,15 @@ function switchScreen(screenName) {
   if (screenName === 'coach') renderCoachProfile();
   if (screenName === 'activities') renderActivities();
   if (screenName === 'today') renderToday();
+  if (screenName === 'calendar') renderCalendar();
 }
 
 function setupFormHandlers() {
-  document.getElementById('profile-form')?.addEventListener('change', updateProfile);
+  document.getElementById('profile-form')?.addEventListener('change', async () => {
+    updateProfile();
+    await generateAICalendarPlan();
+    renderCalendar();
+  });
 }
 
 function updateProfile() {
@@ -524,8 +593,8 @@ function getTodayRecommendation() {
     return {
       title: 'Heute eher regenerativ',
       text: latest
-        ? `Deine Erholung ist heute nicht ideal. Nach deiner letzten Einheit "${latest.name}" passt eher locker oder Pause.`
-        : 'Deine Erholung oder dein Schlaf sind heute nicht ideal. Ruhig und kontrolliert ist sinnvoller als hart.'
+        ? `Vincent, heute eher locker oder Pause. Nach "${latest.name}" und deiner aktuellen Erholung passt kein harter Reiz.`
+        : 'Vincent, heute eher ruhig und kontrolliert statt hart.'
     };
   }
 
@@ -533,14 +602,14 @@ function getTodayRecommendation() {
     return {
       title: 'Heute Qualität möglich',
       text: latest
-        ? `Du bist recht frisch. Nach "${latest.name}" ist heute ein kontrollierter Reiz möglich.`
-        : 'Du bist recht frisch. Ein kontrollierter Reiz ist heute möglich, solange du sauber und nicht maximal trainierst.'
+        ? `Vincent, du bist recht frisch. Nach "${latest.name}" ist heute ein kontrollierter Qualitätsreiz möglich.`
+        : 'Vincent, heute ist ein kontrollierter Reiz möglich, solange du nicht überziehst.'
     };
   }
 
   return {
     title: 'Heute locker bis moderat',
-    text: 'Heute passt eher ein ruhiger bis moderater Trainingstag.'
+    text: 'Vincent, heute passt eher ein ruhiger bis moderater Trainingstag.'
   };
 }
 
@@ -651,6 +720,39 @@ function renderCalendar() {
   const container = document.getElementById('calendar-container');
   if (!container) return;
 
+  if (app.aiWeekPlan && Array.isArray(app.aiWeekPlan.days)) {
+    const focus = app.aiWeekPlan.weekFocus
+      ? `
+        <div class="recommendation-card" style="margin-bottom: 16px;">
+          <div class="card-header">
+            <h3>🗓️ Wochenfokus</h3>
+          </div>
+          <div class="card-body">
+            <p>${app.aiWeekPlan.weekFocus}</p>
+          </div>
+        </div>
+      `
+      : '';
+
+    container.innerHTML = `
+      ${focus}
+      <div class="dashboard-container">
+        ${app.aiWeekPlan.days.map(day => `
+          <div class="dashboard-row">
+            <div class="dashboard-row-left">
+              <div class="dashboard-row-label">${day.day}</div>
+              <div class="dashboard-row-sub">${day.details}</div>
+            </div>
+            <div class="dashboard-row-right">
+              <div class="dashboard-row-value" style="font-size:16px;">${day.title}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    return;
+  }
+
   const days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
   const labels = ['Locker', 'Tempo', 'Ruhe', 'GA1', 'Kraft', 'Long', 'Easy'];
 
@@ -680,7 +782,7 @@ function renderCoachProfile() {
     Mixed: 'Mixed Sports'
   };
 
-  line1.textContent = `${sportMap[app.userData.sport] || app.userData.sport} · ${app.userData.goal} · ${app.userData.days} Tage/Woche`;
+  line1.textContent = `Vincent · ${sportMap[app.userData.sport] || app.userData.sport} · ${app.userData.goal} · ${app.userData.days} Tage/Woche`;
   line2.textContent = `Erholung ${app.metrics.recovery} · Schlaf ${app.metrics.sleep} · Tagesbelastung ${getDayStrain()}`;
 }
 
@@ -695,7 +797,7 @@ function useQuickQuestion(question) {
   }
 }
 
-function addCoachMessage(role, text) {
+function addCoachMessage(role, text, saveToHistory = true) {
   const container = document.getElementById('coach-messages');
   if (!container) return;
 
@@ -707,6 +809,14 @@ function addCoachMessage(role, text) {
   `;
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
+
+  if (saveToHistory) {
+    app.coachHistory.push({
+      role,
+      content: text.replace(/<br>/g, '\n')
+    });
+    app.coachHistory = app.coachHistory.slice(-12);
+  }
 }
 
 async function askCoach() {
@@ -717,7 +827,7 @@ async function askCoach() {
   if (!question) return;
 
   input.value = '';
-  addCoachMessage('user', question);
+  addCoachMessage('user', question, true);
 
   const loadingId = `coach-loading-${Date.now()}`;
   const container = document.getElementById('coach-messages');
@@ -726,7 +836,7 @@ async function askCoach() {
   div.id = loadingId;
   div.innerHTML = `
     <div class="coach-message-role">Coach</div>
-    <div class="coach-message-bubble">Denke über dein Training nach...</div>
+    <div class="coach-message-bubble">Vincent, ich schaue kurz auf deine Daten...</div>
   `;
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
@@ -739,7 +849,8 @@ async function askCoach() {
       metrics: app.metrics,
       activities: app.activities,
       latestActivity,
-      dayStrain: getDayStrain()
+      dayStrain: getDayStrain(),
+      history: app.coachHistory
     };
 
     const response = await fetch(`${API_BASE}/api/coach`, {
@@ -756,17 +867,17 @@ async function askCoach() {
     if (loadingEl) loadingEl.remove();
 
     if (!data.ok || !data.answer) {
-      addCoachMessage('assistant', 'Ich konnte gerade keine KI-Antwort laden. Prüfe bitte dein Backend und den OpenAI API Key.');
+      addCoachMessage('assistant', 'Vincent, ich konnte gerade keine KI-Antwort laden. Prüfe bitte das Backend.');
       return;
     }
 
-    addCoachMessage('assistant', data.answer.replace(/\n/g, '<br>'));
+    addCoachMessage('assistant', data.answer.replace(/\n/g, '<br>'), true);
   } catch (error) {
     console.error(error);
     const loadingEl = document.getElementById(loadingId);
     if (loadingEl) loadingEl.remove();
 
-    addCoachMessage('assistant', 'Gerade gibt es ein Problem mit der Coach-Verbindung. Bitte prüfe, ob dein Backend läuft.');
+    addCoachMessage('assistant', 'Vincent, gerade gibt es ein Problem mit der Coach-Verbindung. Bitte prüfe, ob dein Backend läuft.');
   }
 }
 
